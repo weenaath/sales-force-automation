@@ -1,7 +1,8 @@
-from django.urls import path
-from . import views
+from django.contrib import admin
+from django.urls import path, include
 
 urlpatterns = [
-    path('', views.home, name='home'),
-    path('products/', views.products, name='products'),
+    path('admin/', admin.site.urls),
+    path('', include('sales.urls')),
+    path('api-auth/', include('rest_framework.urls')),  # browsable API login
 ]
