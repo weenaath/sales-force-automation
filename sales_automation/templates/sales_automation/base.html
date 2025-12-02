@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hettigoda Sales System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #d97706; /* Amber-600 */
+            --bg-light: #f3f4f6;
+            --white: #ffffff;
+            --text-dark: #1f2937;
+            --border: #e5e7eb;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); color: var(--text-dark); margin: 0; }
+        
+        /* Layout */
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .card { background: var(--white); border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        /* Buttons */
+        .btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-block;}
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-outline { border: 1px solid var(--border); background: white; color: var(--text-dark); }
+
+        /* Navigation */
+        nav { background: var(--white); border-bottom: 1px solid var(--border); padding: 16px 0; margin-bottom: 30px; }
+        .nav-flex { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 700; color: var(--primary); font-size: 1.2rem; }
+        .nav-links a { margin-left: 20px; text-decoration: none; color: #6b7280; }
+        
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background-color: #f9fafb; font-weight: 600; }
+        
+        /* Forms */
+        input, select { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <nav>
+        <div class="container nav-flex">
+            <div class="logo">📦 Hettigoda Sales</div>
+            <div class="nav-links">
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+                <!-- We will add the Add Sale link later -->
+                <a href="#" style="color: red;">Logout</a> 
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="container">
+        {% block content %}
+        <!-- Child templates will inject content here -->
+        {% endblock %}
+    </div>
+</body>
+</html>
