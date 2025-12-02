@@ -1,0 +1,119 @@
+{% extends 'sales_automation/base.html' %}
+
+{% block content %}
+<div class="card">
+    <h2 style="color: var(--primary);">Record New Visit</h2>
+    
+    <form id="saleForm">
+        <!-- Shop Selection -->
+        <label>Select Shop</label>
+        <select id="shopSelect" required>
+            <option value="">-- Choose a Shop --</option>
+            {% for shop in shops %}
+            <option value="{{ shop.id }}">{{ shop.name }} ({{ shop.route.name }})</option>
+            {% endfor %}
+        </select>
+
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+
+        <!-- Product List -->
+        <h4>Items Sold</h4>
+        <div id="product-list">
+            <!-- Rows will be added here by JS -->
+        </div>
+
+        <button type="button" class="btn btn-outline" onclick="addProductRow()" style="margin-top: 10px;">+ Add Product</button>
+
+        <div style="text-align: right; margin-top: 20px; font-size: 1.5rem; font-weight: bold;">
+            Total: LKR <span id="grand-total">0.00</span>
+        </div>
+
+        <div style="text-align: right; margin-top: 30px;">
+            <a href="{% url 'dashboard' %}" class="btn btn-outline">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Record</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // 1. Get Product Data from Django
+    const products = {{ products_json|safe }};
+
+    function addProductRow() {
+        const container = document.getElementById('product-list');
+        const rowId = Date.now();
+        
+        const div = document.createElement('div');
+        div.style.display = "flex";
+        div.style.gap = "10px";
+        div.style.marginBottom = "10px";
+        div.className = 'product-row';
+        div.innerHTML = `
+            <select class="p-select" style="flex: 2;" onchange="calculateTotal()">
+                <option value="">Select Product...</option>
+                ${products.map(p => `<option value="${p.id}" data-price="${p.unit_price}">${p.name}</option>`).join('')}
+            </select>
+            <input type="number" class="p-qty" value="1" min="1" style="flex: 1;" onchange="calculateTotal()" placeholder="Qty">
+            <input type="text" class="p-sub" value="0.00" disabled style="flex: 1; background: #eee;">
+            <button type="button" onclick="this.parentElement.remove(); calculateTotal();" style="color: red; border: none; background: none; cursor: pointer;">X</button>
+        `;
+        container.appendChild(div);
+    }
+
+    function calculateTotal() {
+        let grandTotal = 0;
+        document.querySelectorAll('.product-row').forEach(row => {
+            const select = row.querySelector('.p-select');
+            const qty = row.querySelector('.p-qty').value;
+            const price = select.options[select.selectedIndex]?.getAttribute('data-price') || 0;
+            
+            const sub = price * qty;
+            row.querySelector('.p-sub').value = sub.toFixed(2);
+            grandTotal += sub;
+        });
+        document.getElementById('grand-total').textContent = grandTotal.toLocaleString('en-LK', {minimumFractionDigits: 2});
+    }
+
+    // Handle Form Submit via AJAX
+    document.getElementById('saleForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const shopId = document.getElementById('shopSelect').value;
+        const items = [];
+        let valid = true;
+
+        document.querySelectorAll('.product-row').forEach(row => {
+            const prodId = row.querySelector('.p-select').value;
+            const qty = row.querySelector('.p-qty').value;
+            if(!prodId || !qty) valid = false;
+            items.push({ product_id: prodId, qty: qty });
+        });
+
+        if(!shopId || items.length === 0 || !valid) {
+            alert("Please select a shop and at least one product.");
+            return;
+        }
+
+        // Send to Django
+        fetch("{% url 'add_sale' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ shop_id: shopId, items: items })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === 'success') {
+                window.location.href = "{% url 'dashboard' %}";
+            } else {
+                alert("Error: " + data.message);
+            }
+        });
+    });
+
+    // Add one row on load
+    addProductRow();
+</script>
+{% endblock %}
