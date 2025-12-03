@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db.models import Sum 
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
@@ -8,31 +9,49 @@ import json
 @login_required
 @login_required
 def dashboard(request):
-    # 1. Recent Sales (Existing)
-    recent_sales = SaleRecord.objects.all().order_by('-date')[:10]
-    total_sales_count = SaleRecord.objects.count()
+    # --- SCENARIO 1: ADMIN (Your Father) ---
+    if request.user.is_superuser:
+        # 1. Global Data
+        recent_sales = SaleRecord.objects.all().order_by('-date')[:10]
+        total_sales_count = SaleRecord.objects.count()
+        total_revenue = SaleRecord.objects.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
-    # 2. Calculate Sales by Route (The New Analytics Logic)
-    # This translates to SQL: SELECT route, SUM(total) FROM sales GROUP BY route
-    sales_by_route = SaleRecord.objects.values('shop__route__name').annotate(
-        total=Sum('total_amount')
-    ).order_by('-total')
+        # 2. Analytics (Sales by Route)
+        sales_by_route = SaleRecord.objects.values('shop__route__name').annotate(
+            total=Sum('total_amount')
+        ).order_by('-total')
 
-    # 3. Prepare Data for Chart.js (Lists work best for JS)
-    route_labels = []
-    route_data = []
-    
-    for item in sales_by_route:
-        route_labels.append(item['shop__route__name'])
-        route_data.append(float(item['total'])) # Convert Decimal to Float for JS
+        # Prepare Chart Data
+        route_labels = [item['shop__route__name'] for item in sales_by_route]
+        route_data = [float(item['total']) for item in sales_by_route]
 
-    context = {
-        'recent_sales': recent_sales,
-        'total_sales_count': total_sales_count,
-        'route_labels': json.dumps(route_labels), # Send as JSON string
-        'route_data': json.dumps(route_data),
-    }
-    return render(request, 'sales_automation/dashboard.html', context)
+        context = {
+            'recent_sales': recent_sales,
+            'total_sales_count': total_sales_count,
+            'total_revenue': total_revenue,
+            'route_labels': json.dumps(route_labels),
+            'route_data': json.dumps(route_data),
+        }
+        return render(request, 'sales_automation/dashboard_admin.html', context)
+
+    # --- SCENARIO 2: SALES REP (The User) ---
+    else:
+        # 1. Personal Data Only (Filter by rep=request.user)
+        my_sales = SaleRecord.objects.filter(rep=request.user).order_by('-date')
+        
+        # Calculate stats
+        today = datetime.date.today()
+        sales_today = my_sales.filter(date__date=today).aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+        total_my_sales = my_sales.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+        visit_count = my_sales.count()
+
+        context = {
+            'recent_sales': my_sales[:10], # Last 10 personal sales
+            'sales_today': sales_today,
+            'total_my_sales': total_my_sales,
+            'visit_count': visit_count
+        }
+        return render(request, 'sales_automation/dashboard_rep.html', context)
 
 import json
 from django.shortcuts import redirect
