@@ -2,35 +2,35 @@
 
 {% block content %}
 <div style="min-height: 80vh; display: flex; align-items: center; justify-content: center;">
-    <div class="card" style="width: 100%; max-width: 400px; padding: 40px;">
-        <div style="text-align: center; margin-bottom: 32px;">
-            <div style="width: 60px; height: 60px; background: var(--primary-light); border-radius: 50%; color: var(--primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-                <i class="ph-fill ph-package" style="font-size: 32px;"></i>
-            </div>
-            <h2 style="font-size: 1.5rem; color: var(--text-main);">Hettigoda Sales</h2>
-            <p style="color: var(--text-muted);">Sign in to access your dashboard</p>
+    <div class="card" style="width: 100%; max-width: 420px; padding: 40px; border-top: 4px solid var(--primary);">
+        
+        <div style="text-align: center; margin-bottom: 30px;">
+            <i class="ph-fill ph-lotus" style="font-size: 48px; color: var(--primary);"></i>
+            <h2 style="font-size: 1.8rem; margin-top: 10px; color: var(--primary-dark);">Siddhalepa</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Sales Force Automation System</p>
         </div>
 
         <form method="post">
             {% csrf_token %}
+            
             <div style="margin-bottom: 20px;">
-                <label>Username</label>
-                <div style="position: relative;">
-                    <i class="ph ph-user" style="position: absolute; left: 12px; top: 14px; color: var(--text-muted);"></i>
-                    <input type="text" name="username" required style="padding-left: 36px;">
-                </div>
+                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Username</label>
+                <input type="text" name="username" required placeholder="Enter your ID" style="background: #fdfbf7;">
             </div>
             
             <div style="margin-bottom: 24px;">
-                <label>Password</label>
-                <div style="position: relative;">
-                    <i class="ph ph-lock" style="position: absolute; left: 12px; top: 14px; color: var(--text-muted);"></i>
-                    <input type="password" name="password" required style="padding-left: 36px;">
-                </div>
+                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Password</label>
+                <input type="password" name="password" required placeholder="••••••••" style="background: #fdfbf7;">
             </div>
             
-            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 14px;">Sign In</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px; font-size: 1rem;">
+                Secure Login
+            </button>
         </form>
+
+        <div style="text-align: center; margin-top: 24px; font-size: 0.8rem; color: #a8a29e;">
+            &copy; 2025 Hettigoda Industries. All rights reserved.
+        </div>
     </div>
 </div>
 {% endblock %}
