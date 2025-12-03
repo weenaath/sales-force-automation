@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from .models import Product, SaleRecord, Shop, Route
+from .models import SaleRecord, Shop, Route, SaleItem, Product
 from django.http import JsonResponse
 import json
 
