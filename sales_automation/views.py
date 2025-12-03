@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from django.db.models import Sum 
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
@@ -40,7 +40,7 @@ def dashboard(request):
         my_sales = SaleRecord.objects.filter(rep=request.user).order_by('-date')
         
         # Calculate stats
-        today = datetime.date.today()
+        today = date.today()
         sales_today = my_sales.filter(date__date=today).aggregate(Sum('total_amount'))['total_amount__sum'] or 0
         total_my_sales = my_sales.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
         visit_count = my_sales.count()
