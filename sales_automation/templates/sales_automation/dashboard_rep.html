@@ -1,0 +1,100 @@
+{% extends 'sales_automation/base.html' %}
+
+{% block content %}
+<!-- Rep Header -->
+<div style="margin-bottom: 30px;">
+    <p style="color: var(--text-muted); margin-bottom: 4px;">Good day, {{ request.user.first_name|default:request.user.username }}</p>
+    <h2 style="font-size: 1.8rem; color: var(--primary-dark);">Your Field Activity</h2>
+</div>
+
+<!-- Quick Action (Big Button for Mobile) -->
+<a href="{% url 'add_sale' %}" class="card" style="display: flex; align-items: center; justify-content: space-between; background: var(--primary); color: white; border: none; text-decoration: none; margin-bottom: 30px;">
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="background: rgba(255,255,255,0.2); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <i class="ph-bold ph-plus" style="font-size: 24px;"></i>
+        </div>
+        <div>
+            <h3 style="font-family: 'Inter', sans-serif; font-size: 1.2rem;">Record New Sale</h3>
+            <p style="opacity: 0.9; font-size: 0.9rem;">Log a shop visit now</p>
+        </div>
+    </div>
+    <i class="ph-bold ph-caret-right" style="font-size: 24px;"></i>
+</a>
+
+<!-- Personal Stats Grid -->
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+    <!-- Today's Sales -->
+    <div class="card" style="margin-bottom: 0; padding: 20px;">
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Sales Today</p>
+        <h3 style="font-size: 1.5rem; color: var(--primary);">{{ sales_today }}</h3>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">LKR</span>
+    </div>
+
+    <!-- Total Visits -->
+    <div class="card" style="margin-bottom: 0; padding: 20px;">
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Total Visits</p>
+        <h3 style="font-size: 1.5rem; color: var(--text-main);">{{ visit_count }}</h3>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">Shops</span>
+    </div>
+</div>
+
+<!-- My Recent History -->
+<div class="card">
+    <h3 style="margin-bottom: 16px; font-size: 1.1rem;">Your Recent Log</h3>
+    <div style="overflow-x: auto;">
+        <table style="font-size: 0.9rem;">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Shop</th>
+                    <th style="text-align: right;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in recent_sales %}
+                <tr>
+                    <td>{{ sale.date|date:"M d" }}</td>
+                    <td style="font-weight: 500;">{{ sale.shop.name }}</td>
+                    <td style="text-align: right;">{{ sale.total_amount }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 20px;">
+                        No sales recorded yet. Start your day! 🚀
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+```
+
+---
+
+### Step 3: Rename/Update the Admin Dashboard (`dashboard_admin.html`)
+
+We need to rename your existing `dashboard.html` to `dashboard_admin.html` so the logic in Step 1 works.
+
+1.  **Rename File:**
+    * Go to `sales_automation/templates/sales_automation/`.
+    * Right-click `dashboard.html` -> Rename to `dashboard_admin.html`.
+
+2.  **Update Content:**
+    * Since we added `total_revenue` in the view, let's add that to the Admin dashboard so your father sees the big money number.
+    * Open `dashboard_admin.html` and add this card into the "KPI Cards" section:
+
+```html
+<!-- Revenue Card (Add this next to the Total Transactions card) -->
+<div class="card" style="border-left: 4px solid #0ea5e9;">
+    <div style="display: flex; justify-content: space-between; align-items: start;">
+        <div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;">Total Revenue</p>
+            <h3 style="font-size: 2rem; color: var(--text-main);">LKR {{ total_revenue|floatformat:0 }}</h3>
+        </div>
+        <div style="background: #e0f2fe; p-2; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+            <i class="ph-fill ph-currency-dollar" style="color: #0ea5e9; font-size: 20px;"></i>
+        </div>
+    </div>
+</div>
