@@ -18,6 +18,45 @@
     </div>
 </div>
 
+<!-- Analytics Section -->
+<div class="card" style="margin-bottom: 30px;">
+    <h3>Sales Performance by Route</h3>
+    <div style="height: 300px;">
+        <canvas id="salesChart"></canvas>
+    </div>
+</div>
+
+<!-- Load Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    
+    // Get data from Django
+    const labels = {{ route_labels|safe }};
+    const data = {{ route_data|safe }};
+
+    new Chart(ctx, {
+        type: 'bar', // Try 'pie' or 'line' if you want!
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Total Sales (LKR)',
+                data: data,
+                backgroundColor: '#d97706', // That Hettigoda Orange color
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+
 <!-- Recent Sales Table -->
 <div class="card">
     <h3>Recent Sales</h3>

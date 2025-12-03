@@ -1,3 +1,4 @@
+from django.db.models import Sum 
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import SaleRecord, Shop, Route, SaleItem, Product
@@ -5,14 +6,31 @@ from django.http import JsonResponse
 import json
 
 @login_required
+@login_required
 def dashboard(request):
-    # Fetch Data
-    recent_sales = SaleRecord.objects.all().order_by('-date')[:10] # Last 10 sales
+    # 1. Recent Sales (Existing)
+    recent_sales = SaleRecord.objects.all().order_by('-date')[:10]
     total_sales_count = SaleRecord.objects.count()
+
+    # 2. Calculate Sales by Route (The New Analytics Logic)
+    # This translates to SQL: SELECT route, SUM(total) FROM sales GROUP BY route
+    sales_by_route = SaleRecord.objects.values('shop__route__name').annotate(
+        total=Sum('total_amount')
+    ).order_by('-total')
+
+    # 3. Prepare Data for Chart.js (Lists work best for JS)
+    route_labels = []
+    route_data = []
     
+    for item in sales_by_route:
+        route_labels.append(item['shop__route__name'])
+        route_data.append(float(item['total'])) # Convert Decimal to Float for JS
+
     context = {
         'recent_sales': recent_sales,
-        'total_sales_count': total_sales_count
+        'total_sales_count': total_sales_count,
+        'route_labels': json.dumps(route_labels), # Send as JSON string
+        'route_data': json.dumps(route_data),
     }
     return render(request, 'sales_automation/dashboard.html', context)
 
