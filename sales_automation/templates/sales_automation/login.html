@@ -1,18 +1,35 @@
 {% extends 'sales_automation/base.html' %}
 
 {% block content %}
-<div style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
-    <div class="card" style="width: 100%; max-width: 400px;">
-        <h2 style="text-align: center; color: var(--primary);">Login</h2>
+<div style="min-height: 80vh; display: flex; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 400px; padding: 40px;">
+        <div style="text-align: center; margin-bottom: 32px;">
+            <div style="width: 60px; height: 60px; background: var(--primary-light); border-radius: 50%; color: var(--primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                <i class="ph-fill ph-package" style="font-size: 32px;"></i>
+            </div>
+            <h2 style="font-size: 1.5rem; color: var(--text-main);">Hettigoda Sales</h2>
+            <p style="color: var(--text-muted);">Sign in to access your dashboard</p>
+        </div>
+
         <form method="post">
             {% csrf_token %}
-            <label>Username</label>
-            <input type="text" name="username" required>
+            <div style="margin-bottom: 20px;">
+                <label>Username</label>
+                <div style="position: relative;">
+                    <i class="ph ph-user" style="position: absolute; left: 12px; top: 14px; color: var(--text-muted);"></i>
+                    <input type="text" name="username" required style="padding-left: 36px;">
+                </div>
+            </div>
             
-            <label>Password</label>
-            <input type="password" name="password" required>
+            <div style="margin-bottom: 24px;">
+                <label>Password</label>
+                <div style="position: relative;">
+                    <i class="ph ph-lock" style="position: absolute; left: 12px; top: 14px; color: var(--text-muted);"></i>
+                    <input type="password" name="password" required style="padding-left: 36px;">
+                </div>
+            </div>
             
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 14px;">Sign In</button>
         </form>
     </div>
 </div>
