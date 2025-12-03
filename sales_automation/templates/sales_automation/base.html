@@ -3,63 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hettigoda Sales System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Hettigoda Sales Hub</title>
+    
+    <!-- Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons: Phosphor -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
     <style>
         :root {
-            --primary: #d97706; /* Amber-600 */
-            --bg-light: #f3f4f6;
-            --white: #ffffff;
-            --text-dark: #1f2937;
+            /* Hettigoda Orange Palette */
+            --primary: #d97706; 
+            --primary-hover: #b45309;
+            --primary-light: #fffbeb;
+            
+            /* Neutrals */
+            --bg-body: #f3f4f6;
+            --surface: #ffffff;
+            --text-main: #111827;
+            --text-muted: #6b7280;
             --border: #e5e7eb;
+            
+            /* Effects */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
         }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); color: var(--text-dark); margin: 0; }
-        
-        /* Layout */
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .card { background: var(--white); border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        
-        /* Buttons */
-        .btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-block;}
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-outline { border: 1px solid var(--border); background: white; color: var(--text-dark); }
 
-        /* Navigation */
-        nav { background: var(--white); border-bottom: 1px solid var(--border); padding: 16px 0; margin-bottom: 30px; }
-        .nav-flex { display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-weight: 700; color: var(--primary); font-size: 1.2rem; }
-        .nav-links a { margin-left: 20px; text-decoration: none; color: #6b7280; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-main); 
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- Layout --- */
+        .container { 
+            max-width: 1100px; 
+            margin: 0 auto; 
+            padding: 24px 20px; 
+        }
+
+        /* --- Navigation --- */
+        .navbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+            padding: 0 20px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .nav-links { display: flex; gap: 24px; align-items: center; }
+        
+        .nav-links a, .nav-links button {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .nav-links a:hover, .nav-links button:hover { color: var(--primary); }
+
+        /* Mobile Menu */
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; color: var(--text-main); }
+        .mobile-menu { display: none; padding: 10px 20px; background: var(--surface); border-bottom: 1px solid var(--border); }
+        .mobile-menu a, .mobile-menu button { display: block; padding: 12px 0; color: var(--text-main); text-decoration: none; width: 100%; text-align: left; background: none; border: none; font-size: 1rem;}
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .mobile-menu-btn { display: block; }
+            .mobile-menu.open { display: block; }
+        }
+
+        /* --- Components --- */
+        .card { 
+            background: var(--surface); 
+            border-radius: var(--radius); 
+            padding: 24px; 
+            box-shadow: var(--shadow-sm); 
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .btn { 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px;
+            padding: 10px 20px; 
+            border-radius: 8px; 
+            font-weight: 500; 
+            cursor: pointer; 
+            text-decoration: none; 
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+        
+        .btn-primary { background-color: var(--primary); color: white; box-shadow: 0 2px 4px rgba(217, 119, 6, 0.3); }
+        .btn-primary:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        
+        .btn-outline { background-color: white; border-color: var(--border); color: var(--text-main); }
+        .btn-outline:hover { background-color: var(--bg-body); border-color: var(--text-muted); }
+
+        .btn-danger-text { color: #ef4444; }
+
+        /* Form Elements */
+        label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9rem; color: var(--text-main); }
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            font-size: 1rem; 
+            background: var(--surface);
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
         /* Tables */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
-        th { background-color: #f9fafb; font-weight: 600; }
-        
-        /* Forms */
-        input, select { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th { text-align: left; padding: 12px 16px; background: var(--bg-body); font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.05em; }
+        td { padding: 16px; border-bottom: 1px solid var(--border); color: var(--text-main); }
+        tr:last-child td { border-bottom: none; }
     </style>
 </head>
 <body>
+
     {% if user.is_authenticated %}
-    <nav>
-        <div class="container nav-flex">
-            <div class="logo">📦 Hettigoda Sales</div>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="{% url 'dashboard' %}" class="logo">
+                <i class="ph-fill ph-package"></i> Hettigoda Sales
+            </a>
+            
             <div class="nav-links">
                 <a href="{% url 'dashboard' %}">Dashboard</a>
-                <!-- We will add the Add Sale link later -->
-                <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                <a href="{% url 'add_sale' %}">New Sale</a>
+                <form action="{% url 'logout' %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" style="background:none; border:none; color:red; cursor:pointer; font-size:1rem; font-family:inherit;">Logout</button>
-                </form> 
+                    <button type="submit" class="btn-danger-text">Logout</button>
+                </form>
             </div>
+
+            <button class="mobile-menu-btn" onclick="toggleMenu()">
+                <i class="ph ph-list"></i>
+            </button>
+        </div>
+        
+        <!-- Mobile Dropdown -->
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="{% url 'dashboard' %}"><i class="ph ph-squares-four"></i> Dashboard</a>
+            <a href="{% url 'add_sale' %}"><i class="ph ph-plus-circle"></i> Record New Sale</a>
+            <form action="{% url 'logout' %}" method="post" style="margin-top:10px; border-top:1px solid var(--border); padding-top:10px;">
+                {% csrf_token %}
+                <button type="submit" style="color: #ef4444;"><i class="ph ph-sign-out"></i> Logout</button>
+            </form>
         </div>
     </nav>
     {% endif %}
 
     <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div style="padding: 12px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0;">
+                    <i class="ph-fill ph-check-circle"></i> {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
         {% block content %}
-        <!-- Child templates will inject content here -->
         {% endblock %}
     </div>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('mobileMenu').classList.toggle('open');
+        }
+    </script>
 </body>
 </html>
