@@ -1,24 +1,26 @@
-from datetime import date
-from django.db.models import Sum, F 
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .models import SaleRecord, Shop, Route, SaleItem, Product
-from django.http import JsonResponse
 import json
+import datetime # <--- This was missing!
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, F
+from django.http import JsonResponse
+from django.views.decorators.csrf import ensure_csrf_cookie
+from .models import SaleRecord, Shop, Route, SaleItem, Product
 
 @login_required
-@login_required
 def dashboard(request):
-    # --- SCENARIO 1: ADMIN ---
+    # --- SCENARIO 1: ADMIN (Your Father) ---
     if request.user.is_superuser:
-        # --- 1. KPI CARDS ---
+        # 1. KPI Cards
         recent_sales = SaleRecord.objects.all().order_by('-date')[:10]
         total_sales_count = SaleRecord.objects.count()
         total_revenue = SaleRecord.objects.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
-        # --- 2. CHART: SALES TREND (Area Chart) ---
-        # Get sales for the last 30 days
+        # 2. CHART: SALES TREND (Last 30 Days)
+        # Calculate the date 30 days ago
         last_30_days = datetime.date.today() - datetime.timedelta(days=30)
+        
+        # Query database for sales since that date
         daily_sales = SaleRecord.objects.filter(date__gte=last_30_days)\
             .extra(select={'day': 'date(date)'})\
             .values('day')\
@@ -28,7 +30,7 @@ def dashboard(request):
         trend_labels = [item['day'] for item in daily_sales]
         trend_data = [float(item['total']) for item in daily_sales]
 
-        # --- 3. CHART: REP PERFORMANCE (Bar Chart) ---
+        # 3. CHART: REP PERFORMANCE
         rep_performance = SaleRecord.objects.values('rep__username').annotate(
             total=Sum('total_amount')
         ).order_by('-total')[:5]
@@ -36,15 +38,14 @@ def dashboard(request):
         rep_labels = [item['rep__username'] for item in rep_performance]
         rep_data = [float(item['total']) for item in rep_performance]
 
-        # --- 4. EXISTING CHARTS ---
-        # Top Products
+        # 4. CHART: TOP PRODUCTS
         sales_by_product = SaleItem.objects.values('product__name').annotate(
             revenue=Sum(F('quantity') * F('price_at_sale'))
         ).order_by('-revenue')[:5]
         product_labels = [item['product__name'] for item in sales_by_product]
         product_data = [float(item['revenue']) for item in sales_by_product]
 
-        # Sales by Route
+        # 5. CHART: SALES BY ROUTE
         sales_by_route = SaleRecord.objects.values('shop__route__name').annotate(
             total=Sum('total_amount')
         ).order_by('-total')
@@ -69,60 +70,50 @@ def dashboard(request):
 
     # --- SCENARIO 2: SALES REP (The User) ---
     else:
-        # 1. Personal Data Only (Filter by rep=request.user)
+        # Personal Data Only
         my_sales = SaleRecord.objects.filter(rep=request.user).order_by('-date')
         
         # Calculate stats
-        today = date.today()
+        today = datetime.date.today()
         sales_today = my_sales.filter(date__date=today).aggregate(Sum('total_amount'))['total_amount__sum'] or 0
         total_my_sales = my_sales.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
         visit_count = my_sales.count()
 
         context = {
-            'recent_sales': my_sales[:10], # Last 10 personal sales
+            'recent_sales': my_sales[:10],
             'sales_today': sales_today,
             'total_my_sales': total_my_sales,
             'visit_count': visit_count
         }
         return render(request, 'sales_automation/dashboard_rep.html', context)
 
-import json
-from django.shortcuts import redirect
-from django.contrib import messages
-from django.views.decorators.csrf import ensure_csrf_cookie
-
 @login_required
 @ensure_csrf_cookie
 def add_sale(request):
     if request.method == 'POST':
         try:
-            # 1. Get the data from the request
             data = json.loads(request.body)
             shop_id = data.get('shop_id')
-            items = data.get('items') # This is a list of {product_id, qty}
+            items = data.get('items')
 
-            # 2. Validation
             if not shop_id or not items:
                 return JsonResponse({'status': 'error', 'message': 'Missing shop or items'}, status=400)
 
             shop = Shop.objects.get(id=shop_id)
 
-            # 3. Create the Main Sale Record (The Header)
             sale = SaleRecord.objects.create(
                 rep=request.user,
                 shop=shop,
-                total_amount=0 # We will update this after adding items
+                total_amount=0
             )
 
-            # 4. Create the Items and calculate total
             grand_total = 0
             
             for item in items:
                 product = Product.objects.get(id=item['product_id'])
                 qty = int(item['qty'])
-                price = product.unit_price # Fetch current price
+                price = product.unit_price
                 
-                # Create the line item
                 SaleItem.objects.create(
                     sale_record=sale,
                     product=product,
@@ -131,26 +122,22 @@ def add_sale(request):
                 )
                 grand_total += (price * qty)
 
-            # 5. Update the grand total
             sale.total_amount = grand_total
             sale.save()
 
-            messages.success(request, f"Sale recorded for {shop.name}!")
             return JsonResponse({'status': 'success'})
 
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
-    # --- GET REQUEST (Show the HTML page) ---
+    # GET Request
     shops = Shop.objects.all()
     products = Product.objects.all()
-    
-    # We pass products as JSON too so JavaScript can read prices easily
     products_json = list(products.values('id', 'name', 'unit_price')) 
     
     context = {
         'shops': shops,
         'products': products,
-        'products_json': json.dumps(products_json, default=str) # Send data to JS
+        'products_json': json.dumps(products_json, default=str)
     }
     return render(request, 'sales_automation/add_sale.html', context)
