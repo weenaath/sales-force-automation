@@ -4,10 +4,10 @@
 <!-- Welcome Header -->
 <div style="display: flex; justify-content: space-between; align-items: end; margin-bottom: 32px;">
     <div>
-        <p style="color: var(--text-muted); margin-bottom: 4px; font-weight: 500;">Ayubowan, {{ request.user.first_name|default:request.user.username }}! 🙏</p>
-        <h2 style="font-size: 2rem; color: var(--primary-dark);">Sales Overview</h2>
+        <p style="color: var(--text-muted); margin-bottom: 4px; font-weight: 500;">Dashboard Overview</p>
+        <h2 style="font-size: 1.8rem; color: var(--text-main);">Welcome, {{ request.user.first_name|default:"Admin" }}</h2>
     </div>
-    <a href="{% url 'add_sale' %}" class="btn btn-accent">
+    <a href="{% url 'add_sale' %}" class="btn btn-primary">
         <i class="ph-bold ph-plus"></i> Record Visit
     </a>
 </div>
@@ -22,21 +22,21 @@
                 <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;">Total Transactions</p>
                 <h3 style="font-size: 2rem; color: var(--text-main);">{{ total_sales_count }}</h3>
             </div>
-            <div style="background: #f0fdf4; p-2; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                <i class="ph-fill ph-receipt" style="color: var(--primary); font-size: 20px;"></i>
+            <div style="background: #eff6ff; padding: 10px; border-radius: 8px;">
+                <i class="ph-fill ph-receipt" style="color: var(--primary); font-size: 24px;"></i>
             </div>
         </div>
     </div>
 
-    <!-- Active Region Card -->
-    <div class="card" style="border-left: 4px solid var(--accent);">
+    <!-- Revenue Card -->
+    <div class="card" style="border-left: 4px solid #10b981;">
         <div style="display: flex; justify-content: space-between; align-items: start;">
             <div>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;">Top Performing Route</p>
-                <h3 style="font-size: 2rem; color: var(--text-main);">Homagama</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;">Total Revenue</p>
+                <h3 style="font-size: 2rem; color: var(--text-main);">{{ total_revenue|floatformat:0 }}</h3>
             </div>
-            <div style="background: #fffbeb; p-2; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                <i class="ph-fill ph-crown" style="color: var(--accent); font-size: 20px;"></i>
+            <div style="background: #ecfdf5; padding: 10px; border-radius: 8px;">
+                <i class="ph-fill ph-currency-dollar" style="color: #10b981; font-size: 24px;"></i>
             </div>
         </div>
     </div>
@@ -44,8 +44,11 @@
 
 <!-- Chart Section -->
 <div class="card">
-    <div style="margin-bottom: 24px;">
-        <h3>Regional Performance</h3>
+    <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 1.1rem;">Performance by Route</h3>
+        <button class="btn" style="color: var(--text-muted); border: 1px solid var(--border); font-size: 0.8rem;">
+            <i class="ph ph-download-simple"></i> Export
+        </button>
     </div>
     <div style="height: 350px;">
         <canvas id="salesChart"></canvas>
@@ -54,13 +57,13 @@
 
 <!-- Recent Transactions -->
 <div class="card">
-    <h3 style="margin-bottom: 20px;">Recent Sales Log</h3>
+    <h3 style="margin-bottom: 20px; font-size: 1.1rem;">Recent Activity Log</h3>
     <div style="overflow-x: auto;">
         <table>
             <thead>
                 <tr>
                     <th>Date</th>
-                    <th>Shop Name</th>
+                    <th>Customer / Shop</th>
                     <th>Representative</th>
                     <th style="text-align: right;">Amount (LKR)</th>
                 </tr>
@@ -69,9 +72,13 @@
                 {% for sale in recent_sales %}
                 <tr>
                     <td>{{ sale.date|date:"M d, Y" }}</td>
-                    <td style="font-weight: 600; color: var(--primary-dark);">{{ sale.shop.name }}</td>
-                    <td>{{ sale.rep.username|title }}</td>
-                    <td style="text-align: right; font-family: monospace; font-size: 1rem;">{{ sale.total_amount }}</td>
+                    <td style="font-weight: 500;">{{ sale.shop.name }}</td>
+                    <td>
+                        <span style="display: inline-flex; align-items: center; gap: 6px; background: #f3f4f6; padding: 2px 8px; border-radius: 12px; font-size: 0.85rem;">
+                            {{ sale.rep.username }}
+                        </span>
+                    </td>
+                    <td style="text-align: right; font-family: monospace; font-size: 0.95rem;">{{ sale.total_amount }}</td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -83,14 +90,12 @@
     </div>
 </div>
 
-<!-- Chart Logic (Fixed Syntax Error) -->
+<!-- Chart Logic -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('salesChart').getContext('2d');
         
-        // Use a safe way to parse the data, preventing the "Unexpected token" error
-        // If data is missing, it falls back to an empty array []
         const rawLabels = '{{ route_labels|default:"[]"|escapejs }}';
         const rawData = '{{ route_data|default:"[]"|escapejs }}';
         
@@ -109,10 +114,9 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Sales Volume (LKR)',
+                    label: 'Sales Volume',
                     data: data,
-                    backgroundColor: '#15803d', // Siddhalepa Green
-                    hoverBackgroundColor: '#d97706', // Turns Orange on Hover!
+                    backgroundColor: '#2563eb', // Enterprise Blue
                     borderRadius: 4,
                     barPercentage: 0.6,
                 }]
@@ -124,7 +128,7 @@
                 scales: {
                     y: { 
                         beginAtZero: true,
-                        grid: { borderDash: [5, 5], color: '#e5e5e5' }
+                        grid: { borderDash: [5, 5], color: '#f3f4f6' }
                     },
                     x: {
                         grid: { display: false }
