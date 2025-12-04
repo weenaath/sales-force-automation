@@ -1,5 +1,5 @@
 from datetime import date
-from django.db.models import Sum 
+from django.db.models import Sum, F 
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import SaleRecord, Shop, Route, SaleItem, Product
@@ -9,21 +9,29 @@ import json
 @login_required
 @login_required
 def dashboard(request):
-    # --- SCENARIO 1: ADMIN (Your Father) ---
+    # --- SCENARIO 1: ADMIN ---
     if request.user.is_superuser:
         # 1. Global Data
         recent_sales = SaleRecord.objects.all().order_by('-date')[:10]
         total_sales_count = SaleRecord.objects.count()
         total_revenue = SaleRecord.objects.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
-        # 2. Analytics (Sales by Route)
+        # 2. Analytics: Sales by Route (Existing)
         sales_by_route = SaleRecord.objects.values('shop__route__name').annotate(
             total=Sum('total_amount')
         ).order_by('-total')
 
-        # Prepare Chart Data
         route_labels = [item['shop__route__name'] for item in sales_by_route]
         route_data = [float(item['total']) for item in sales_by_route]
+
+        # 3. Analytics: Top Products (NEW LOGIC) 
+        # Calculates Revenue per Product (Price * Qty)
+        sales_by_product = SaleItem.objects.values('product__name').annotate(
+            revenue=Sum(F('quantity') * F('price_at_sale'))
+        ).order_by('-revenue')[:5] # Get Top 5 only
+
+        product_labels = [item['product__name'] for item in sales_by_product]
+        product_data = [float(item['revenue']) for item in sales_by_product]
 
         context = {
             'recent_sales': recent_sales,
@@ -31,6 +39,8 @@ def dashboard(request):
             'total_revenue': total_revenue,
             'route_labels': json.dumps(route_labels),
             'route_data': json.dumps(route_data),
+            'product_labels': json.dumps(product_labels), # <--- New
+            'product_data': json.dumps(product_data),     # <--- New
         }
         return render(request, 'sales_automation/dashboard_admin.html', context)
 

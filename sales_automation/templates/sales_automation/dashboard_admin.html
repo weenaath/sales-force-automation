@@ -42,17 +42,29 @@
     </div>
 </div>
 
-<!-- Chart Section -->
-<div class="card">
-    <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="font-size: 1.1rem;">Performance by Route</h3>
-        <button class="btn" style="color: var(--text-muted); border: 1px solid var(--border); font-size: 0.8rem;">
-            <i class="ph ph-download-simple"></i> Export
-        </button>
+<!-- Charts Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 24px;">
+    
+    <!-- Chart 1: Route Performance -->
+    <div class="card" style="margin-bottom: 0;">
+        <div style="margin-bottom: 20px;">
+            <h3 style="font-size: 1.1rem;">Revenue by Route</h3>
+        </div>
+        <div style="height: 300px;">
+            <canvas id="salesChart"></canvas>
+        </div>
     </div>
-    <div style="height: 350px;">
-        <canvas id="salesChart"></canvas>
+
+    <!-- Chart 2: Top Products (NEW) -->
+    <div class="card" style="margin-bottom: 0;">
+        <div style="margin-bottom: 20px;">
+            <h3 style="font-size: 1.1rem;">Top 5 Products</h3>
+        </div>
+        <div style="height: 300px;">
+            <canvas id="productChart"></canvas>
+        </div>
     </div>
+
 </div>
 
 <!-- Recent Transactions -->
@@ -94,46 +106,62 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        
-        const rawLabels = '{{ route_labels|default:"[]"|escapejs }}';
-        const rawData = '{{ route_data|default:"[]"|escapejs }}';
-        
-        let labels = [];
-        let data = [];
+        // --- CHART 1: ROUTES ---
+        const ctxRoute = document.getElementById('salesChart').getContext('2d');
+        const routeLabels = JSON.parse('{{ route_labels|default:"[]"|escapejs }}');
+        const routeData = JSON.parse('{{ route_data|default:"[]"|escapejs }}');
 
-        try {
-            labels = JSON.parse(rawLabels);
-            data = JSON.parse(rawData);
-        } catch(e) {
-            console.error("Chart data error:", e);
-        }
-
-        new Chart(ctx, {
+        new Chart(ctxRoute, {
             type: 'bar',
             data: {
-                labels: labels,
+                labels: routeLabels,
                 datasets: [{
-                    label: 'Sales Volume',
-                    data: data,
-                    backgroundColor: '#2563eb', // Enterprise Blue
+                    label: 'Revenue',
+                    data: routeData,
+                    backgroundColor: '#2563eb',
                     borderRadius: 4,
-                    barPercentage: 0.6,
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
-                scales: {
-                    y: { 
-                        beginAtZero: true,
-                        grid: { borderDash: [5, 5], color: '#f3f4f6' }
-                    },
-                    x: {
-                        grid: { display: false }
-                    }
+                scales: { 
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true, grid: { borderDash: [5, 5] } } 
                 }
+            }
+        });
+
+        // --- CHART 2: PRODUCTS (NEW) ---
+        const ctxProduct = document.getElementById('productChart').getContext('2d');
+        const productLabels = JSON.parse('{{ product_labels|default:"[]"|escapejs }}');
+        const productData = JSON.parse('{{ product_data|default:"[]"|escapejs }}');
+
+        new Chart(ctxProduct, {
+            type: 'doughnut', // Doughnut chart looks great for "Parts of a Whole"
+            data: {
+                labels: productLabels,
+                datasets: [{
+                    data: productData,
+                    backgroundColor: [
+                        '#2563eb', // Blue
+                        '#3b82f6', // Light Blue
+                        '#60a5fa', // Lighter Blue
+                        '#93c5fd', // Pale Blue
+                        '#dbeafe'  //Very Pale Blue
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' } // Put legend on the side
+                },
+                cutout: '70%' // Makes the doughnut thinner/more modern
             }
         });
     });
