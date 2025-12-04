@@ -159,7 +159,9 @@ sales-force-automation/
 
 ## 📝 License
 
-Distributed under the MIT License. See LICENSE for more information.
+Copyright (c) 2025 Sakindu Weenath 
+
+All Rights Reserved.
 
 ## 👤 Author
 
