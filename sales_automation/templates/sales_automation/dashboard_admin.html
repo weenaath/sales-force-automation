@@ -1,120 +1,145 @@
 {% extends 'sales_automation/base.html' %}
 
 {% block content %}
-<!-- Welcome Header -->
-<div style="display: flex; justify-content: space-between; align-items: end; margin-bottom: 32px;">
-    <div>
-        <p style="color: var(--text-muted); margin-bottom: 4px; font-weight: 500;">Ayubowan, {{ request.user.first_name|default:request.user.username }}! 🙏</p>
-        <h2 style="font-size: 2rem; color: var(--primary-dark);">Sales Overview</h2>
+<style>
+    /* Custom "Glass" Style for this dashboard */
+    .modern-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        border: 1px solid rgba(255,255,255,0.5);
+        transition: transform 0.2s;
+    }
+    .modern-card:hover { transform: translateY(-2px); }
+    
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .chart-title { font-size: 1rem; font-weight: 600; color: #374151; }
+    
+    .stat-badge {
+        padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+    }
+</style>
+
+<!-- Welcome Section -->
+<div style="margin-bottom: 30px;">
+    <h2 style="font-size: 1.8rem; font-weight: 700; color: #1e293b;">Analytics Overview</h2>
+    <p style="color: #64748b;">Here is what's happening in your business today.</p>
+</div>
+
+<!-- KPI Row -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; margin-bottom: 30px;">
+    <!-- Revenue -->
+    <div class="modern-card" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white;">
+        <div style="opacity: 0.8; font-size: 0.9rem; margin-bottom: 8px;">Total Revenue</div>
+        <div style="font-size: 2.2rem; font-weight: 700;">LKR {{ total_revenue|floatformat:0 }}</div>
+        <div style="margin-top: 10px; font-size: 0.85rem; opacity: 0.9;">
+            <i class="ph-bold ph-trend-up"></i> +12% from last month
+        </div>
     </div>
-    <a href="{% url 'add_sale' %}" class="btn btn-accent">
-        <i class="ph-bold ph-plus"></i> Record Visit
+
+    <!-- Transactions -->
+    <div class="modern-card">
+        <div style="display: flex; justify-content: space-between;">
+            <div>
+                <div style="color: #64748b; font-size: 0.9rem;">Total Sales</div>
+                <div style="font-size: 1.8rem; font-weight: 700; color: #1e293b; margin-top: 5px;">{{ total_sales_count }}</div>
+            </div>
+            <div style="background: #f1f5f9; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <i class="ph-fill ph-receipt" style="font-size: 24px; color: #475569;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Card -->
+    <a href="{% url 'add_sale' %}" class="modern-card" style="text-decoration: none; display: flex; align-items: center; gap: 16px; border: 2px dashed #cbd5e1; background: transparent; justify-content: center; cursor: pointer;">
+        <div style="background: #e0e7ff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <i class="ph-bold ph-plus" style="color: #4f46e5;"></i>
+        </div>
+        <div style="font-weight: 600; color: #4f46e5;">Record New Sale</div>
     </a>
 </div>
 
-<!-- KPI Cards -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 32px;">
+<!-- MAIN CHART ROW (Trend + Products) -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 30px;">
     
-    <!-- Total Sales Card -->
-    <div class="card" style="border-left: 4px solid var(--primary);">
-        <div style="display: flex; justify-content: space-between; align-items: start;">
-            <div>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;">Total Transactions</p>
-                <h3 style="font-size: 2rem; color: var(--text-main);">{{ total_sales_count }}</h3>
-            </div>
-            <div style="background: #f0fdf4; p-2; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                <i class="ph-fill ph-receipt" style="color: var(--primary); font-size: 20px;"></i>
-            </div>
+    <!-- Area Chart: Sales Trend -->
+    <div class="modern-card">
+        <div class="chart-header">
+            <span class="chart-title">Sales Dynamics (Last 30 Days)</span>
+            <span class="stat-badge" style="background: #e0e7ff; color: #4f46e5;">Growth</span>
+        </div>
+        <div style="height: 300px;">
+            <canvas id="trendChart"></canvas>
         </div>
     </div>
 
-    <!-- Active Region Card -->
-    <div class="card" style="border-left: 4px solid var(--accent);">
-        <div style="display: flex; justify-content: space-between; align-items: start;">
-            <div>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;">Top Performing Route</p>
-                <h3 style="font-size: 2rem; color: var(--text-main);">Homagama</h3>
-            </div>
-            <div style="background: #fffbeb; p-2; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                <i class="ph-fill ph-crown" style="color: var(--accent); font-size: 20px;"></i>
+    <!-- Doughnut Chart: Top Products -->
+    <div class="modern-card">
+        <div class="chart-header">
+            <span class="chart-title">Top Products</span>
+        </div>
+        <div style="height: 250px; position: relative;">
+            <canvas id="productChart"></canvas>
+            <!-- Center Text for Doughnut -->
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                <div style="font-size: 0.8rem; color: #64748b;">Top 5</div>
+                <div style="font-weight: 700; color: #1e293b;">Items</div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Chart Section -->
-<div class="card">
-    <div style="margin-bottom: 24px;">
-        <h3>Regional Performance</h3>
+<!-- SECONDARY CHART ROW (Reps + Routes) -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 30px;">
+    
+    <!-- Bar Chart: Rep Performance -->
+    <div class="modern-card">
+        <div class="chart-header">
+            <span class="chart-title">Team Performance</span>
+        </div>
+        <div style="height: 250px;">
+            <canvas id="repChart"></canvas>
+        </div>
     </div>
-    <div style="height: 350px;">
-        <canvas id="salesChart"></canvas>
+
+    <!-- Bar Chart: Route Stats -->
+    <div class="modern-card">
+        <div class="chart-header">
+            <span class="chart-title">Route Distribution</span>
+        </div>
+        <div style="height: 250px;">
+            <canvas id="routeChart"></canvas>
+        </div>
     </div>
 </div>
 
-<!-- Recent Transactions -->
-<div class="card">
-    <h3 style="margin-bottom: 20px;">Recent Sales Log</h3>
-    <div style="overflow-x: auto;">
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Shop Name</th>
-                    <th>Representative</th>
-                    <th style="text-align: right;">Amount (LKR)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for sale in recent_sales %}
-                <tr>
-                    <td>{{ sale.date|date:"M d, Y" }}</td>
-                    <td style="font-weight: 600; color: var(--primary-dark);">{{ sale.shop.name }}</td>
-                    <td>{{ sale.rep.username|title }}</td>
-                    <td style="text-align: right; font-family: monospace; font-size: 1rem;">{{ sale.total_amount }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">No sales recorded yet.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- Chart Logic (Fixed Syntax Error) -->
+<!-- Javascript for Charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('salesChart').getContext('2d');
         
-        // Use a safe way to parse the data, preventing the "Unexpected token" error
-        // If data is missing, it falls back to an empty array []
-        const rawLabels = '{{ route_labels|default:"[]"|escapejs }}';
-        const rawData = '{{ route_data|default:"[]"|escapejs }}';
-        
-        let labels = [];
-        let data = [];
+        // --- 1. TREND CHART (Area - The "Wavy" one) ---
+        const ctxTrend = document.getElementById('trendChart').getContext('2d');
+        // Create Gradient
+        const gradient = ctxTrend.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(79, 70, 229, 0.4)'); // Purple top
+        gradient.addColorStop(1, 'rgba(79, 70, 229, 0.0)'); // Transparent bottom
 
-        try {
-            labels = JSON.parse(rawLabels);
-            data = JSON.parse(rawData);
-        } catch(e) {
-            console.error("Chart data error:", e);
-        }
-
-        new Chart(ctx, {
-            type: 'bar',
+        new Chart(ctxTrend, {
+            type: 'line',
             data: {
-                labels: labels,
+                labels: JSON.parse('{{ trend_labels|default:"[]"|escapejs }}'),
                 datasets: [{
-                    label: 'Sales Volume (LKR)',
-                    data: data,
-                    backgroundColor: '#15803d', // Siddhalepa Green
-                    hoverBackgroundColor: '#d97706', // Turns Orange on Hover!
-                    borderRadius: 4,
-                    barPercentage: 0.6,
+                    label: 'Sales',
+                    data: JSON.parse('{{ trend_data|default:"[]"|escapejs }}'),
+                    borderColor: '#4f46e5',
+                    backgroundColor: gradient,
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4, // Makes lines curved
+                    pointRadius: 0,
+                    pointHoverRadius: 6
                 }]
             },
             options: {
@@ -122,13 +147,78 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { 
-                        beginAtZero: true,
-                        grid: { borderDash: [5, 5], color: '#e5e5e5' }
-                    },
-                    x: {
-                        grid: { display: false }
-                    }
+                    x: { grid: { display: false } },
+                    y: { border: { display: false }, grid: { color: '#f1f5f9' }, beginAtZero: true }
+                }
+            }
+        });
+
+        // --- 2. PRODUCT CHART (Doughnut) ---
+        const ctxProd = document.getElementById('productChart').getContext('2d');
+        new Chart(ctxProd, {
+            type: 'doughnut',
+            data: {
+                labels: JSON.parse('{{ product_labels|default:"[]"|escapejs }}'),
+                datasets: [{
+                    data: JSON.parse('{{ product_data|default:"[]"|escapejs }}'),
+                    backgroundColor: ['#4f46e5', '#818cf8', '#c7d2fe', '#a5b4fc', '#6366f1'],
+                    borderWidth: 0,
+                    cutout: '75%' // Thinner ring
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // --- 3. REP CHART (Vertical Bar) ---
+        const ctxRep = document.getElementById('repChart').getContext('2d');
+        new Chart(ctxRep, {
+            type: 'bar',
+            data: {
+                labels: JSON.parse('{{ rep_labels|default:"[]"|escapejs }}'),
+                datasets: [{
+                    label: 'Revenue',
+                    data: JSON.parse('{{ rep_data|default:"[]"|escapejs }}'),
+                    backgroundColor: '#8b5cf6', // Violet
+                    borderRadius: 6,
+                    barPercentage: 0.5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { display: false }
+                }
+            }
+        });
+
+        // --- 4. ROUTE CHART (Bar) ---
+        const ctxRoute = document.getElementById('routeChart').getContext('2d');
+        new Chart(ctxRoute, {
+            type: 'bar',
+            data: {
+                labels: JSON.parse('{{ route_labels|default:"[]"|escapejs }}'),
+                datasets: [{
+                    label: 'Revenue',
+                    data: JSON.parse('{{ route_data|default:"[]"|escapejs }}'),
+                    backgroundColor: '#ec4899', // Pink
+                    borderRadius: 6,
+                    barPercentage: 0.5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { display: false }
                 }
             }
         });
