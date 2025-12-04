@@ -1,38 +1,225 @@
 {% extends 'sales_automation/base.html' %}
 
 {% block content %}
-<div class="card">
-    <h2 style="color: var(--primary);">Record New Visit</h2>
-    
-    <form id="saleForm">
-        <!-- Shop Selection -->
-        <label>Select Shop</label>
-        <select id="shopSelect" required>
-            <option value="">-- Choose a Shop --</option>
-            {% for shop in shops %}
-            <option value="{{ shop.id }}">{{ shop.name }} ({{ shop.route.name }})</option>
-            {% endfor %}
-        </select>
+<style>
+    /* --- PAGE STYLES --- */
+    body {
+        background-color: #f8fafc;
+        background-image: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
+    }
 
-        <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        max-width: 800px;
+        margin: 0 auto;
+    }
 
-        <!-- Product List -->
-        <h4>Items Sold</h4>
-        <div id="product-list">
-            <!-- Rows will be added here by JS -->
+    .form-header {
+        background: #f8fafc;
+        padding: 24px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .form-body {
+        padding: 24px;
+    }
+
+    /* --- INPUTS --- */
+    label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 8px;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    select, input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 1rem;
+        color: #1e293b;
+        background: #fff;
+        transition: all 0.2s;
+    }
+    select:focus, input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+
+    /* --- PRODUCT ROW GRID --- */
+    .product-headers {
+        display: grid;
+        grid-template-columns: 4fr 1.5fr 2fr 40px;
+        gap: 12px;
+        padding: 0 12px;
+        margin-bottom: 8px;
+        display: none; /* Hidden on mobile, shown on desktop */
+    }
+
+    .product-row {
+        display: grid;
+        grid-template-columns: 1fr; /* Stacked on mobile */
+        gap: 10px;
+        background: #f8fafc;
+        padding: 16px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 12px;
+        position: relative;
+        animation: slideDown 0.2s ease-out;
+    }
+
+    /* Desktop View for Grid */
+    @media (min-width: 640px) {
+        .product-headers { display: grid; }
+        .product-row {
+            grid-template-columns: 4fr 1.5fr 2fr 40px; /* Product | Qty | Total | Del */
+            background: white;
+            padding: 0;
+            border: none;
+            align-items: center;
+        }
+        .mobile-label { display: none; }
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn-add-row {
+        background: #eff6ff;
+        color: #2563eb;
+        border: 2px dashed #bfdbfe;
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .btn-add-row:hover {
+        background: #dbeafe;
+        border-color: #93c5fd;
+    }
+
+    /* --- FOOTER TOTALS --- */
+    .total-section {
+        background: #1e293b; /* Dark Navy */
+        color: white;
+        padding: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .total-label { font-size: 0.9rem; opacity: 0.8; }
+    .total-amount { font-size: 2rem; font-weight: 700; color: #4ade80; } /* Bright Green */
+
+    .btn-submit {
+        background: #2563eb;
+        color: white;
+        padding: 14px 28px;
+        border-radius: 8px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    .btn-submit:hover { background: #1d4ed8; }
+
+</style>
+
+<div class="container">
+    <div class="form-card">
+        
+        <!-- Header -->
+        <div class="form-header">
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a;">New Transaction</h2>
+                <p style="color: #64748b; font-size: 0.9rem; margin: 0;">Record a new shop visit</p>
+            </div>
+            <div style="background: #e0f2fe; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="ph-bold ph-receipt" style="color: #0284c7; font-size: 20px;"></i>
+            </div>
         </div>
 
-        <button type="button" class="btn btn-outline" onclick="addProductRow()" style="margin-top: 10px;">+ Add Product</button>
+        <form id="saleForm">
+            <div class="form-body">
+                
+                <!-- Section 1: Customer -->
+                <div style="margin-bottom: 32px;">
+                    <label>Select Customer / Shop</label>
+                    <div style="position: relative;">
+                        <i class="ph-bold ph-storefront" style="position: absolute; left: 14px; top: 14px; color: #94a3b8;"></i>
+                        <select id="shopSelect" required style="padding-left: 44px; appearance: none;">
+                            <option value="">-- Search Shop --</option>
+                            {% for shop in shops %}
+                            <option value="{{ shop.id }}">{{ shop.name }} ({{ shop.route.name }})</option>
+                            {% endfor %}
+                        </select>
+                        <i class="ph-bold ph-caret-down" style="position: absolute; right: 14px; top: 14px; color: #94a3b8; pointer-events: none;"></i>
+                    </div>
+                </div>
 
-        <div style="text-align: right; margin-top: 20px; font-size: 1.5rem; font-weight: bold;">
-            Total: LKR <span id="grand-total">0.00</span>
-        </div>
+                <!-- Section 2: Items -->
+                <div style="margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <label style="margin: 0;">Order Items</label>
+                        <span style="font-size: 0.8rem; color: #64748b;" id="item-count">0 Items</span>
+                    </div>
 
-        <div style="text-align: right; margin-top: 30px;">
-            <a href="{% url 'dashboard' %}" class="btn btn-outline">Cancel</a>
-            <button type="submit" class="btn btn-primary">Save Record</button>
-        </div>
-    </form>
+                    <!-- Desktop Headers -->
+                    <div class="product-headers">
+                        <span style="font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase;">Product</span>
+                        <span style="font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase;">Qty</span>
+                        <span style="font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase;">Subtotal</span>
+                        <span></span>
+                    </div>
+
+                    <div id="product-list">
+                        <!-- JS Rows go here -->
+                    </div>
+
+                    <button type="button" class="btn-add-row" onclick="addProductRow()">
+                        <i class="ph-bold ph-plus-circle"></i> Add Another Product
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Footer: Totals & Action -->
+            <div class="total-section">
+                <div>
+                    <div class="total-label">Grand Total</div>
+                    <div class="total-amount">LKR <span id="grand-total">0.00</span></div>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <a href="{% url 'dashboard' %}" style="padding: 14px 20px; color: #94a3b8; text-decoration: none; font-weight: 600;">Cancel</a>
+                    <button type="submit" class="btn-submit">
+                        Complete Sale <i class="ph-bold ph-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
@@ -44,37 +231,84 @@
         const rowId = Date.now();
         
         const div = document.createElement('div');
-        div.style.display = "flex";
-        div.style.gap = "10px";
-        div.style.marginBottom = "10px";
         div.className = 'product-row';
+        div.id = `row-${rowId}`;
+        
+        // Generate Options
+        const options = products.map(p => 
+            `<option value="${p.id}" data-price="${p.unit_price}">${p.name} (LKR ${p.unit_price})</option>`
+        ).join('');
+
         div.innerHTML = `
-            <select class="p-select" style="flex: 2;" onchange="calculateTotal()">
-                <option value="">Select Product...</option>
-                ${products.map(p => `<option value="${p.id}" data-price="${p.unit_price}">${p.name}</option>`).join('')}
-            </select>
-            <input type="number" class="p-qty" value="1" min="1" style="flex: 1;" onchange="calculateTotal()" placeholder="Qty">
-            <input type="text" class="p-sub" value="0.00" disabled style="flex: 1; background: #eee;">
-            <button type="button" onclick="this.parentElement.remove(); calculateTotal();" style="color: red; border: none; background: none; cursor: pointer;">X</button>
+            <!-- Product Select -->
+            <div style="position: relative;">
+                <label class="mobile-label">Product</label>
+                <select class="p-select" onchange="calculateTotal()" style="width: 100%;">
+                    <option value="">Select Item...</option>
+                    ${options}
+                </select>
+            </div>
+
+            <!-- Quantity -->
+            <div>
+                <label class="mobile-label">Quantity</label>
+                <input type="number" class="p-qty" value="1" min="1" onchange="calculateTotal()" onkeyup="calculateTotal()" placeholder="0" style="text-align: center;">
+            </div>
+
+            <!-- Subtotal (Read Only) -->
+            <div>
+                <label class="mobile-label">Subtotal</label>
+                <input type="text" class="p-sub" value="0.00" disabled style="background: #f1f5f9; border: none; font-weight: 600; color: #475569; text-align: right;">
+            </div>
+
+            <!-- Delete Button -->
+            <div style="text-align: right;">
+                <button type="button" onclick="removeRow('${rowId}')" style="background: #fee2e2; color: #ef4444; border: none; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <i class="ph-bold ph-trash"></i>
+                </button>
+            </div>
         `;
+        
         container.appendChild(div);
+        updateItemCount();
+    }
+
+    function removeRow(id) {
+        const row = document.getElementById(`row-${id}`);
+        if(row) {
+            row.style.opacity = '0';
+            setTimeout(() => {
+                row.remove();
+                calculateTotal();
+                updateItemCount();
+            }, 200);
+        }
+    }
+
+    function updateItemCount() {
+        const count = document.querySelectorAll('.product-row').length;
+        document.getElementById('item-count').textContent = `${count} Item${count !== 1 ? 's' : ''}`;
     }
 
     function calculateTotal() {
         let grandTotal = 0;
         document.querySelectorAll('.product-row').forEach(row => {
             const select = row.querySelector('.p-select');
-            const qty = row.querySelector('.p-qty').value;
-            const price = select.options[select.selectedIndex]?.getAttribute('data-price') || 0;
+            const qtyInput = row.querySelector('.p-qty');
+            const subInput = row.querySelector('.p-sub');
+
+            const price = parseFloat(select.options[select.selectedIndex]?.getAttribute('data-price')) || 0;
+            const qty = parseInt(qtyInput.value) || 0;
             
             const sub = price * qty;
-            row.querySelector('.p-sub').value = sub.toFixed(2);
+            subInput.value = sub.toLocaleString('en-LK', {minimumFractionDigits: 2}); // Show pretty subtotal
+            
             grandTotal += sub;
         });
         document.getElementById('grand-total').textContent = grandTotal.toLocaleString('en-LK', {minimumFractionDigits: 2});
     }
 
-    // Handle Form Submit via AJAX
+    // Handle Form Submit
     document.getElementById('saleForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -85,14 +319,30 @@
         document.querySelectorAll('.product-row').forEach(row => {
             const prodId = row.querySelector('.p-select').value;
             const qty = row.querySelector('.p-qty').value;
-            if(!prodId || !qty) valid = false;
+            
+            if(!prodId || !qty || qty <= 0) valid = false;
+            
             items.push({ product_id: prodId, qty: qty });
         });
 
-        if(!shopId || items.length === 0 || !valid) {
-            alert("Please select a shop and at least one product.");
+        if(!shopId) {
+            alert("⚠️ Please select a shop!");
             return;
         }
+        if (items.length === 0) {
+            alert("⚠️ Please add at least one product.");
+            return;
+        }
+        if (!valid) {
+            alert("⚠️ Please ensure all items have a product and valid quantity.");
+            return;
+        }
+
+        // Show Loading State
+        const btn = document.querySelector('.btn-submit');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `<i class="ph-bold ph-spinner ph-spin"></i> Saving...`;
+        btn.disabled = true;
 
         // Send to Django
         fetch("{% url 'add_sale' %}", {
@@ -106,14 +356,27 @@
         .then(response => response.json())
         .then(data => {
             if(data.status === 'success') {
-                window.location.href = "{% url 'dashboard' %}";
+                // Success Animation or Redirect
+                btn.innerHTML = `<i class="ph-bold ph-check"></i> Done!`;
+                btn.style.backgroundColor = "#10b981";
+                setTimeout(() => {
+                    window.location.href = "{% url 'dashboard' %}";
+                }, 800);
             } else {
                 alert("Error: " + data.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Server Error. Please try again.");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         });
     });
 
-    // Add one row on load
+    // Init
     addProductRow();
 </script>
 {% endblock %}
