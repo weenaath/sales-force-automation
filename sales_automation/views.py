@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, F
 from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
-from .models import SaleRecord, Shop, Route, SaleItem, Product
+from .models import SaleRecord, Shop, Route, SaleItem, Product, RepProfile
 
 @login_required
 def dashboard(request):
@@ -70,22 +70,43 @@ def dashboard(request):
 
     # --- SCENARIO 2: SALES REP (The User) ---
     else:
-        # Personal Data Only
+        # 1. Basic Stats
         my_sales = SaleRecord.objects.filter(rep=request.user).order_by('-date')
-        
-        # Calculate stats
         today = datetime.date.today()
-        sales_today = my_sales.filter(date__date=today).aggregate(Sum('total_amount'))['total_amount__sum'] or 0
-        total_my_sales = my_sales.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
         visit_count = my_sales.count()
+        sales_today = my_sales.filter(date__date=today).aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+
+        # 2. TARGET CALCULATION (New Logic)
+        # Get sales for the current month (e.g., Sales in December)
+        current_month_sales = my_sales.filter(
+            date__year=today.year, 
+            date__month=today.month
+        ).aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+
+        # Get the User's Target
+        try:
+            profile = RepProfile.objects.get(user=request.user)
+            target = profile.monthly_target
+        except RepProfile.DoesNotExist:
+            target = 100000 # Default if admin hasn't set one yet
+
+        # Calculate Percentage (Avoid division by zero)
+        if target > 0:
+            percentage = (current_month_sales / target) * 100
+        else:
+            percentage = 0
 
         context = {
             'recent_sales': my_sales[:10],
             'sales_today': sales_today,
-            'total_my_sales': total_my_sales,
-            'visit_count': visit_count
+            'visit_count': visit_count,
+            # New Data for Template
+            'monthly_target': target,
+            'current_month_sales': current_month_sales,
+            'target_percentage': min(round(percentage), 100) # Cap at 100% for the bar
         }
         return render(request, 'sales_automation/dashboard_rep.html', context)
+    
 
 @login_required
 @ensure_csrf_cookie

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Route, Shop, Product, SaleRecord, SaleItem
+from .models import Route, Shop, Product, SaleRecord, SaleItem, RepProfile
 
 # This allows managing "Sale Items" directly inside the "Sale Record" page
 class SaleItemInline(admin.TabularInline):
@@ -30,3 +30,7 @@ class ProductAdmin(admin.ModelAdmin):
 
 # Register the simple models
 admin.site.register(Route)
+
+@admin.register(RepProfile)
+class RepProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'monthly_target')

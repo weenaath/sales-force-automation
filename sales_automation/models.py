@@ -54,3 +54,11 @@ class SaleItem(models.Model):
 
     def get_subtotal(self):
         return self.quantity * self.price_at_sale
+    
+# Extended Profile for Sales Reps
+class RepProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    monthly_target = models.DecimalField(max_digits=12, decimal_places=2, default=100000.00)
+    
+    def __str__(self):
+        return f"Profile: {self.user.username}"
