@@ -11,36 +11,59 @@ import json
 def dashboard(request):
     # --- SCENARIO 1: ADMIN ---
     if request.user.is_superuser:
-        # 1. Global Data
+        # --- 1. KPI CARDS ---
         recent_sales = SaleRecord.objects.all().order_by('-date')[:10]
         total_sales_count = SaleRecord.objects.count()
         total_revenue = SaleRecord.objects.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
-        # 2. Analytics: Sales by Route (Existing)
+        # --- 2. CHART: SALES TREND (Area Chart) ---
+        # Get sales for the last 30 days
+        last_30_days = datetime.date.today() - datetime.timedelta(days=30)
+        daily_sales = SaleRecord.objects.filter(date__gte=last_30_days)\
+            .extra(select={'day': 'date(date)'})\
+            .values('day')\
+            .annotate(total=Sum('total_amount'))\
+            .order_by('day')
+        
+        trend_labels = [item['day'] for item in daily_sales]
+        trend_data = [float(item['total']) for item in daily_sales]
+
+        # --- 3. CHART: REP PERFORMANCE (Bar Chart) ---
+        rep_performance = SaleRecord.objects.values('rep__username').annotate(
+            total=Sum('total_amount')
+        ).order_by('-total')[:5]
+
+        rep_labels = [item['rep__username'] for item in rep_performance]
+        rep_data = [float(item['total']) for item in rep_performance]
+
+        # --- 4. EXISTING CHARTS ---
+        # Top Products
+        sales_by_product = SaleItem.objects.values('product__name').annotate(
+            revenue=Sum(F('quantity') * F('price_at_sale'))
+        ).order_by('-revenue')[:5]
+        product_labels = [item['product__name'] for item in sales_by_product]
+        product_data = [float(item['revenue']) for item in sales_by_product]
+
+        # Sales by Route
         sales_by_route = SaleRecord.objects.values('shop__route__name').annotate(
             total=Sum('total_amount')
         ).order_by('-total')
-
         route_labels = [item['shop__route__name'] for item in sales_by_route]
         route_data = [float(item['total']) for item in sales_by_route]
-
-        # 3. Analytics: Top Products (NEW LOGIC) 
-        # Calculates Revenue per Product (Price * Qty)
-        sales_by_product = SaleItem.objects.values('product__name').annotate(
-            revenue=Sum(F('quantity') * F('price_at_sale'))
-        ).order_by('-revenue')[:5] # Get Top 5 only
-
-        product_labels = [item['product__name'] for item in sales_by_product]
-        product_data = [float(item['revenue']) for item in sales_by_product]
 
         context = {
             'recent_sales': recent_sales,
             'total_sales_count': total_sales_count,
             'total_revenue': total_revenue,
+            # JSON Data for JS
+            'trend_labels': json.dumps(trend_labels, default=str),
+            'trend_data': json.dumps(trend_data),
+            'rep_labels': json.dumps(rep_labels),
+            'rep_data': json.dumps(rep_data),
+            'product_labels': json.dumps(product_labels),
+            'product_data': json.dumps(product_data),
             'route_labels': json.dumps(route_labels),
             'route_data': json.dumps(route_data),
-            'product_labels': json.dumps(product_labels), # <--- New
-            'product_data': json.dumps(product_data),     # <--- New
         }
         return render(request, 'sales_automation/dashboard_admin.html', context)
 
