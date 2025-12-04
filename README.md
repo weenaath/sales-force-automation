@@ -141,27 +141,27 @@ Add Products (e.g., "Item A", "Item B") with prices.
 Add Shops and assign them to Routes.
 
 📂 Project Structure
-
-sales-force-automation/ 
-├── config/                  # Main project settings & URLs 
-├── sales_automation/        # The core app 
-│   ├── migrations/          # Database migration files 
-│   ├── static/              # CSS, JS, Images 
-│   ├── templates/           # HTML files 
-│   │   └── sales_automation/  
-│   │       ├── base.html              # Master layout 
-│   │       ├── dashboard_admin.html   # HQ view 
-│   │       ├── dashboard_rep.html     # Field view 
-│   │       ├── add_sale.html          # Data entry 
-│   │       └── login.html             # Auth page 
-│   ├── admin.py             # Admin panel config 
-│   ├── models.py            # Database schema 
-│   ├── views.py             # Business logic & Charts 
-│   └── urls.py              # App routing 
-├── manage.py                # Django CLI 
-├── requirements.txt         # Dependencies 
-└── db.sqlite3               # Local database 
-
+```
+sales-force-automation/
+├── config/                     # Main project settings & URLs
+├── sales_automation/           # The core app
+│   ├── migrations/             # Database migration files
+│   ├── static/                 # CSS, JS, Images
+│   ├── templates/              # HTML files
+│   │   └── sales_automation/
+│   │       ├── base.html             # Master layout
+│   │       ├── dashboard_admin.html  # HQ view
+│   │       ├── dashboard_rep.html    # Field view
+│   │       ├── add_sale.html         # Data entry
+│   │       └── login.html            # Auth page
+│   ├── admin.py                # Admin panel config
+│   ├── models.py               # Database schema
+│   ├── views.py                # Business logic & Charts
+│   └── urls.py                 # App routing
+├── manage.py                   # Django CLI
+├── requirements.txt            # Dependencies
+└── db.sqlite3                  # Local database 
+```
 
 🤝 Contributing
 
