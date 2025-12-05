@@ -3,6 +3,17 @@
 import os
 import sys
 
+# This block fixes the "usedforsecurity" crash in ReportLab
+import hashlib
+try:
+    hashlib.md5(b'test', usedforsecurity=False)
+except TypeError:
+    # Your system doesn't support the security flag, so we strip it out
+    original_md5 = hashlib.md5
+    def patched_md5(*args, **kwargs):
+        kwargs.pop('usedforsecurity', None)
+        return original_md5(*args, **kwargs)
+    hashlib.md5 = patched_md5
 
 def main():
     """Run administrative tasks."""
