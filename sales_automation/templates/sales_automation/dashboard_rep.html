@@ -62,7 +62,7 @@
     <i class="ph-bold ph-caret-right" style="font-size: 24px;"></i>
 </a>
 
-<!-- 2. Target Progress Card (SINGLE INSTANCE) -->
+<!-- 2. Target Progress Card -->
 <div class="rep-card" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border: none;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <div style="display: flex; align-items: center; gap: 8px;">
@@ -118,7 +118,13 @@
                 </div>
                 <div>
                     <div style="font-weight: 600; color: #1e293b; font-size: 0.95rem;">{{ sale.shop.name }}</div>
-                    <div style="font-size: 0.8rem; color: #94a3b8;">{{ sale.date|date:"M d, h:i A" }}</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8; display: flex; align-items: center; gap: 8px;">
+                        <span>{{ sale.date|date:"M d, h:i A" }}</span>
+                        <!-- New Invoice Link -->
+                        <a href="{% url 'download_invoice' sale.id %}" style="text-decoration: none; color: #2563eb; font-weight: 500; font-size: 0.75rem; background: #eef2ff; padding: 2px 8px; border-radius: 4px;">
+                            Receipt
+                        </a>
+                    </div>
                 </div>
             </div>
             <div style="font-weight: 700; color: #1e293b;">

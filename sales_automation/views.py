@@ -3,9 +3,11 @@ import datetime
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, F
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from .models import SaleRecord, Shop, Route, SaleItem, Product, RepProfile
+from django.template.loader import get_template
+from xhtml2pdf import pisa
 
 @login_required
 def dashboard(request):
@@ -180,3 +182,27 @@ def add_sale(request):
         'products_json': json.dumps(products_json, default=str)
     }
     return render(request, 'sales_automation/add_sale.html', context)
+
+@login_required
+def download_invoice(request, sale_id):
+    # 1. Get the sale record
+    sale = SaleRecord.objects.get(id=sale_id)
+    items = sale.items.all() # Get all products in this sale
+
+    # 2. Render the HTML template with data
+    template_path = 'sales_automation/invoice.html'
+    context = {'sale': sale, 'items': items}
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # 3. Create PDF
+    response = HttpResponse(content_type='application/pdf')
+    # Set filename: "invoice_0005.pdf"
+    response['Content-Disposition'] = f'attachment; filename="invoice_{sale.id}.pdf"'
+    
+    # 4. Convert HTML to PDF
+    pisa_status = pisa.CreatePDF(html, dest=response)
+
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response

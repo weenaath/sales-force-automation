@@ -127,10 +127,10 @@
     </div>
 </div>
 
-<!-- Secondary Metrics -->
+<!-- Secondary Metrics Row -->
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px;">
     
-    <!-- Real-Time Target Monitor (NEW) -->
+    <!-- Real-Time Target Monitor -->
     <div class="dashboard-card">
         <h3 class="chart-title">Live Target Monitor</h3>
         <div style="display: flex; flex-direction: column; gap: 20px;">
@@ -170,6 +170,51 @@
         <div style="height: 250px;">
             <canvas id="routeChart"></canvas>
         </div>
+    </div>
+</div>
+
+<!-- Recent Sales Table (With PDF Invoice) -->
+<div class="dashboard-card">
+    <h3 class="chart-title">Recent Transactions</h3>
+    <div class="table-responsive" style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th style="text-align: left; padding: 12px; color: #64748b; font-size: 0.85rem; background: #f8fafc;">Date</th>
+                    <th style="text-align: left; padding: 12px; color: #64748b; font-size: 0.85rem; background: #f8fafc;">Shop Name</th>
+                    <th style="text-align: left; padding: 12px; color: #64748b; font-size: 0.85rem; background: #f8fafc;">Sales Rep</th>
+                    <th style="text-align: left; padding: 12px; color: #64748b; font-size: 0.85rem; background: #f8fafc;">Receipt</th>
+                    <th style="text-align: right; padding: 12px; color: #64748b; font-size: 0.85rem; background: #f8fafc;">Amount (LKR)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in recent_sales %}
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 16px 12px; font-size: 0.9rem; color: #64748b;">{{ sale.date|date:"M d" }}</td>
+                    <td style="padding: 16px 12px; font-weight: 600; color: #1e293b;">{{ sale.shop.name }}</td>
+                    <td style="padding: 16px 12px;">
+                        <span style="background: #f1f5f9; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; color: #475569;">
+                            {{ sale.rep.username }}
+                        </span>
+                    </td>
+                    <td style="padding: 16px 12px;">
+                        <a href="{% url 'download_invoice' sale.id %}" target="_blank" style="text-decoration: none; color: #2563eb; font-weight: 500; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="ph-bold ph-file-pdf"></i> PDF
+                        </a>
+                    </td>
+                    <td style="padding: 16px 12px; text-align: right; font-weight: 700; color: #1e293b;">
+                        {{ sale.total_amount|floatformat:2 }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
+                        No transactions recorded yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 
