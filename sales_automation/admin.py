@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Route, Shop, Product, SaleRecord, SaleItem, RepProfile
+from django.utils.html import format_html
 
 # This allows managing "Sale Items" directly inside the "Sale Record" page
 class SaleItemInline(admin.TabularInline):
@@ -8,14 +9,19 @@ class SaleItemInline(admin.TabularInline):
 
 @admin.register(SaleRecord)
 class SaleRecordAdmin(admin.ModelAdmin):
-    # What columns to show in the list
-    list_display = ('date', 'shop', 'rep', 'total_amount')
-    # Sidebar filters (Crucial for analysis!)
-    list_filter = ('date', 'rep', 'shop__route') 
-    # Search bar
+    list_display = ('date', 'shop', 'rep', 'total_amount', 'view_location') # Added view_location
+    list_filter = ('date', 'rep', 'shop__route')
     search_fields = ('shop__name', 'rep__username')
-    # Add the inline items table
     inlines = [SaleItemInline]
+
+    # Function to generate Google Maps Link
+    def view_location(self, obj):
+        if obj.gps_lat and obj.gps_lon:
+            url = f"https://www.google.com/maps/search/?api=1&query={obj.gps_lat},{obj.gps_lon}"
+            return format_html('<a href="{}" target="_blank" style="color:blue;">View Map 📍</a>', url)
+        return "No Data"
+    
+    view_location.short_description = "GPS Location"
 
 @admin.register(Shop)
 class ShopAdmin(admin.ModelAdmin):

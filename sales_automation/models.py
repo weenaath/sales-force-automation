@@ -36,6 +36,10 @@ class SaleRecord(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     note = models.TextField(blank=True, null=True)
+    
+    #---GPS FIELDS---
+    gps_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    gps_lon = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
     def __str__(self):
         return f"Sale #{self.id} - {self.shop.name}"

@@ -128,16 +128,23 @@ def add_sale(request):
             data = json.loads(request.body)
             shop_id = data.get('shop_id')
             items = data.get('items')
+            
+            # 1. GET GPS DATA FROM REQUEST
+            lat = data.get('lat') 
+            lon = data.get('lon')
 
             if not shop_id or not items:
                 return JsonResponse({'status': 'error', 'message': 'Missing shop or items'}, status=400)
 
             shop = Shop.objects.get(id=shop_id)
 
+            # 2. SAVE GPS TO DATABASE
             sale = SaleRecord.objects.create(
                 rep=request.user,
                 shop=shop,
-                total_amount=0
+                total_amount=0,
+                gps_lat=lat, # <--- Saving here
+                gps_lon=lon  # <--- Saving here
             )
 
             grand_total = 0

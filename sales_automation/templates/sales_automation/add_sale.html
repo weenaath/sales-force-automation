@@ -155,6 +155,11 @@
             <div>
                 <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a;">New Transaction</h2>
                 <p style="color: #64748b; font-size: 0.9rem; margin: 0;">Record a new shop visit</p>
+                
+                <!-- NEW: GPS STATUS INDICATOR -->
+                <div id="gps-status" style="font-size: 0.75rem; color: #f59e0b; margin-top: 4px; font-weight: 600;">
+                    <i class="ph-bold ph-spinner ph-spin"></i> Locating...
+                </div>
             </div>
             <div style="background: #e0f2fe; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                 <i class="ph-bold ph-receipt" style="color: #0284c7; font-size: 20px;"></i>
@@ -225,6 +230,40 @@
 <script>
     // 1. Get Product Data from Django
     const products = {{ products_json|safe }};
+    
+    // --- NEW: GPS VARIABLES ---
+    let currentLat = null;
+    let currentLon = null;
+
+    // 2. Get Location Immediately on Load
+    window.onload = function() {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    currentLat = position.coords.latitude;
+                    currentLon = position.coords.longitude;
+                    
+                    // Update UI to Green
+                    const status = document.getElementById('gps-status');
+                    if(status) {
+                        status.innerHTML = `<i class="ph-fill ph-check-circle"></i> GPS Locked`;
+                        status.style.color = "#10b981"; 
+                    }
+                },
+                (error) => {
+                    console.error("GPS Error:", error);
+                    const status = document.getElementById('gps-status');
+                    if(status) {
+                        status.innerHTML = `<i class="ph-bold ph-warning"></i> GPS Denied`;
+                        status.style.color = "#ef4444"; 
+                    }
+                }
+            );
+        } else {
+            const status = document.getElementById('gps-status');
+            if(status) status.innerText = "GPS not supported";
+        }
+    };
 
     function addProductRow() {
         const container = document.getElementById('product-list');
@@ -351,7 +390,13 @@
                 'Content-Type': 'application/json',
                 'X-CSRFToken': '{{ csrf_token }}'
             },
-            body: JSON.stringify({ shop_id: shopId, items: items })
+            body: JSON.stringify({ 
+                shop_id: shopId, 
+                items: items,
+                // --- NEW: SEND GPS DATA ---
+                lat: currentLat,
+                lon: currentLon
+            })
         })
         .then(response => response.json())
         .then(data => {
