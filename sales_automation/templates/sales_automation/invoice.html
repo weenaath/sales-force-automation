@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice #{{ sale.id }}</title>
+    <style>
+        body { font-family: Helvetica, sans-serif; color: #333; line-height: 1.5; }
+        .header-box { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
+        .logo-text { font-size: 24px; font-weight: bold; color: #1e40af; }
+        .invoice-title { font-size: 18px; text-transform: uppercase; margin-top: 10px; letter-spacing: 2px; }
+        
+        .info-section { width: 100%; margin-bottom: 30px; }
+        .info-left { float: left; width: 50%; }
+        .info-right { float: right; width: 40%; text-align: right; }
+        
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th { background-color: #f8fafc; border-bottom: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; text-transform: uppercase; }
+        td { border-bottom: 1px solid #eee; padding: 10px 8px; font-size: 14px; }
+        
+        .total-box { float: right; width: 40%; }
+        .total-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 14px; }
+        .grand-total { font-size: 18px; font-weight: bold; color: #1e40af; border-top: 2px solid #eee; padding-top: 10px; margin-top: 5px; }
+        
+        .footer { position: fixed; bottom: 0px; left: 0px; right: 0px; height: 50px; text-align: center; font-size: 10px; color: #999; border-top: 1px solid #eee; padding-top: 10px; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header-box">
+        <div class="logo-text">SALES FORCE AUTOMATION</div>
+        <div class="invoice-title">Sales Receipt</div>
+        <div>Invoice #INV-{{ sale.id|stringformat:"05d" }}</div>
+        <div>Date: {{ sale.date|date:"F d, Y" }}</div>
+    </div>
+
+    <!-- Customer & Rep Info -->
+    <div class="info-section">
+        <div class="info-left">
+            <strong>Billed To:</strong><br>
+            {{ sale.shop.name }}<br>
+            {{ sale.shop.address }}<br>
+            Route: {{ sale.shop.route.name }}
+        </div>
+        <div class="info-right">
+            <strong>Sales Representative:</strong><br>
+            {{ sale.rep.first_name }} {{ sale.rep.last_name }}<br>
+            ({{ sale.rep.username }})
+        </div>
+        <div style="clear: both;"></div>
+    </div>
+
+    <!-- Items Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Item Description</th>
+                <th style="text-align: center;">Qty</th>
+                <th style="text-align: right;">Unit Price</th>
+                <th style="text-align: right;">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td style="text-align: center;">{{ item.quantity }}</td>
+                <td style="text-align: right;">{{ item.price_at_sale }}</td>
+                <td style="text-align: right;">{{ item.get_subtotal }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div class="total-box">
+        <div class="total-row">
+            <span>Subtotal:</span>
+            <span style="float:right;">{{ sale.total_amount }}</span>
+        </div>
+        <div class="total-row grand-total">
+            <span>Grand Total:</span>
+            <span style="float:right;">LKR {{ sale.total_amount }}</span>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        Thank you for your business!<br>
+        Generated via SFA System • GPS Location Verified: {{ sale.gps_lat|default:"N/A" }}, {{ sale.gps_lon|default:"N/A" }}
+    </div>
+</body>
+</html>
