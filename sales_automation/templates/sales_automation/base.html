@@ -15,18 +15,18 @@
     <style>
         :root {
             /* Enterprise Blue Palette */
-            --primary: #2563eb; /* Royal Blue */
+            --primary: #2563eb; 
             --primary-dark: #1e40af;
-            --accent: #f59e0b; /* Warning/Action Orange */
+            --accent: #f59e0b; 
             
             /* Modern Clean Tones */
-            --bg-body: #f3f4f6; /* Cool Gray */
+            --bg-body: #f3f4f6; 
             --surface: #ffffff;
-            --text-main: #111827; /* Near Black */
-            --text-muted: #6b7280; /* Gray 500 */
-            --border: #e5e7eb;
+            --text-main: #111827; 
+            --text-muted: #64748b; 
+            --border: #e2e8f0;
             
-            --radius: 8px;
+            --radius: 12px;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
 
@@ -36,23 +36,23 @@
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-body); 
             color: var(--text-main);
+            min-height: 100vh;
         }
 
-        h1, h2, h3, .logo-text {
-            font-family: 'Inter', sans-serif; /* Clean Sans-Serif */
-            letter-spacing: -0.02em;
-        }
-
-        /* --- Navbar --- */
+        /* --- 🧼 GLASS NAVBAR (The Upgrade) --- */
         .navbar {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            padding: 0 20px;
-            height: 64px;
-            position: sticky;
+            /* 1. Semi-transparent background */
+            background: rgba(255, 255, 255, 0.85);
+            /* 2. The Blur Effect (Frosted Glass) */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px); /* Safari support */
+            
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+            height: 70px;
+            position: sticky; /* Sticks to top */
             top: 0;
-            z-index: 50;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            z-index: 100; /* Stays above content */
+            transition: all 0.3s ease;
         }
         
         .nav-content {
@@ -62,6 +62,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 0 20px;
         }
 
         .logo {
@@ -76,7 +77,10 @@
             font-weight: 700;
             font-size: 1.25rem;
             color: var(--text-main);
+            letter-spacing: -0.02em;
         }
+
+        .nav-links { display: flex; align-items: center; }
 
         .nav-links a {
             color: var(--text-muted);
@@ -85,93 +89,66 @@
             margin-left: 24px;
             font-size: 0.9rem;
             transition: color 0.2s;
+            position: relative;
         }
 
-        .nav-links a:hover, .nav-links a.active {
-            color: var(--primary);
+        .nav-links a:hover { color: var(--primary); }
+
+        /* Logout Button Style */
+        .btn-logout {
+            background: none;
+            border: none;
+            margin-left: 24px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            font-family: inherit;
+            transition: color 0.2s;
         }
+        .btn-logout:hover { color: #ef4444; }
 
         /* --- UI Components --- */
         .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
 
-        .card { 
-            background: var(--surface); 
-            border: 1px solid var(--border);
-            border-radius: var(--radius); 
-            padding: 24px; 
-            box-shadow: var(--shadow);
-            margin-bottom: 24px;
-        }
-
-        .btn { 
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 10px 20px; border-radius: 6px; 
-            font-weight: 500; cursor: pointer; text-decoration: none; 
-            transition: all 0.2s; border: none; font-size: 0.9rem;
-        }
-        
-        .btn-primary { 
-            background-color: var(--primary); 
-            color: white; 
-            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
-        }
-        .btn-primary:hover { background-color: var(--primary-dark); transform: translateY(-1px); }
-        
-        .btn-accent { 
-            background-color: var(--accent); 
-            color: white; 
-        }
-
-        /* Form Styling */
-        input, select { 
-            width: 100%; padding: 10px 12px; 
-            border: 1px solid var(--border); border-radius: 6px; 
-            background: #fff; font-family: 'Inter', sans-serif;
-            transition: border-color 0.2s;
-        }
-        input:focus, select:focus { outline: none; border-color: var(--primary); ring: 1px var(--primary); }
-
-        /* Tables */
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; background: #f9fafb; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;}
-        td { padding: 16px 12px; border-bottom: 1px solid var(--border); }
-
         /* --- TOAST NOTIFICATIONS --- */
-    #toast-container {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
+        #toast-container {
+            position: fixed;
+            top: 90px; /* Below navbar */
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-    .toast {
-        background: white;
-        padding: 16px 20px;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        min-width: 300px;
-        transform: translateX(120%);
-        transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        border-left: 4px solid transparent;
-    }
+        .toast {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-left: 4px solid transparent;
+        }
 
-    .toast.show { transform: translateX(0); }
+        .toast.show { transform: translateX(0); }
 
-    .toast-success { border-left-color: #10b981; }
-    .toast-success i { color: #10b981; }
+        .toast-success { border-left-color: #10b981; }
+        .toast-success i { color: #10b981; }
 
-    .toast-error { border-left-color: #ef4444; }
-    .toast-error i { color: #ef4444; }
+        .toast-error { border-left-color: #ef4444; }
+        .toast-error i { color: #ef4444; }
 
-    .toast-content strong { display: block; font-size: 0.9rem; color: #1e293b; }
-    .toast-content span { font-size: 0.85rem; color: #64748b; }
-        
+        .toast-content strong { display: block; font-size: 0.9rem; color: #1e293b; margin-bottom: 2px;}
+        .toast-content span { font-size: 0.85rem; color: #64748b; }
+
     </style>
 </head>
 <body>
@@ -181,15 +158,16 @@
         <div class="nav-content">
             <a href="{% url 'dashboard' %}" class="logo">
                 <i class="ph-fill ph-trend-up" style="font-size: 28px;"></i>
-                <span class="logo-text">SFA <span style="font-weight:400; color: var(--text-muted);">System</span></span>
+                <span class="logo-text">SFA <span style="font-weight:400; color: #94a3b8;">System</span></span>
             </a>
             
             <div class="nav-links">
                 <a href="{% url 'dashboard' %}">Dashboard</a>
                 <a href="{% url 'add_sale' %}">New Sale</a>
+                
                 <form action="{% url 'logout' %}" method="post" style="display:inline;">
                     {% csrf_token %}
-                    <button type="submit" style="background:none; border:none; margin-left:24px; color: var(--text-muted); cursor:pointer; font-size:0.9rem;">Logout</button>
+                    <button type="submit" class="btn-logout">Logout</button>
                 </form>
             </div>
         </div>
@@ -197,14 +175,7 @@
     {% endif %}
 
     <div class="container">
-        {% if messages %}
-            {% for message in messages %}
-                <div style="padding:15px; background:#eff6ff; color:#1e40af; border:1px solid #dbeafe; border-radius:6px; margin-bottom:20px;">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-
+        <!-- Messages are now handled by JS Toasts below, but we keep this layout block just in case -->
         {% block content %}
         {% endblock %}
     </div>
@@ -223,34 +194,40 @@
             
             // Icons based on type
             const icon = type === 'success' ? 'ph-check-circle' : 'ph-warning-circle';
+            const displayTitle = title || (type === 'success' ? 'Success' : 'Notification');
             
             toast.innerHTML = `
                 <i class="ph-fill ${icon}" style="font-size: 24px;"></i>
                 <div class="toast-content">
-                    <strong>${title}</strong>
+                    <strong>${displayTitle}</strong>
                     <span>${message}</span>
                 </div>
             `;
 
             container.appendChild(toast);
 
-            // Animate In (Small delay to allow DOM render)
+            // Animate In
             setTimeout(() => toast.classList.add('show'), 10);
 
-            // Remove after 3 seconds
+            // Remove after 3.5 seconds
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 300);
             }, 3500);
         }
 
-        // Check for Django Messages (Server-side toasts)
+        // Handle Django Server Messages via Toasts
         {% if messages %}
             {% for message in messages %}
-                showToast("Notification", "{{ message }}", "{{ message.tags }}");
+                // Map Django tags to our types
+                // django: 'debug', 'info', 'success', 'warning', 'error'
+                let type = 'success';
+                let tag = "{{ message.tags }}";
+                if(tag.includes('error') || tag.includes('warning')) type = 'error';
+                
+                showToast(type === 'success' ? 'Success' : 'Alert', "{{ message }}", type);
             {% endfor %}
         {% endif %}
     </script>
-
 </body>
 </html>
