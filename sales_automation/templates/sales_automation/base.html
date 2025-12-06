@@ -135,6 +135,42 @@
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; padding: 12px; background: #f9fafb; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;}
         td { padding: 16px 12px; border-bottom: 1px solid var(--border); }
+
+        /* --- TOAST NOTIFICATIONS --- */
+    #toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .toast {
+        background: white;
+        padding: 16px 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 300px;
+        transform: translateX(120%);
+        transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        border-left: 4px solid transparent;
+    }
+
+    .toast.show { transform: translateX(0); }
+
+    .toast-success { border-left-color: #10b981; }
+    .toast-success i { color: #10b981; }
+
+    .toast-error { border-left-color: #ef4444; }
+    .toast-error i { color: #ef4444; }
+
+    .toast-content strong { display: block; font-size: 0.9rem; color: #1e293b; }
+    .toast-content span { font-size: 0.85rem; color: #64748b; }
         
     </style>
 </head>
@@ -172,6 +208,49 @@
         {% block content %}
         {% endblock %}
     </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <script>
+        // Global Toast Function
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            
+            // Create Toast Element
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            // Icons based on type
+            const icon = type === 'success' ? 'ph-check-circle' : 'ph-warning-circle';
+            
+            toast.innerHTML = `
+                <i class="ph-fill ${icon}" style="font-size: 24px;"></i>
+                <div class="toast-content">
+                    <strong>${title}</strong>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            // Animate In (Small delay to allow DOM render)
+            setTimeout(() => toast.classList.add('show'), 10);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Check for Django Messages (Server-side toasts)
+        {% if messages %}
+            {% for message in messages %}
+                showToast("Notification", "{{ message }}", "{{ message.tags }}");
+            {% endfor %}
+        {% endif %}
+    </script>
 
 </body>
 </html>
