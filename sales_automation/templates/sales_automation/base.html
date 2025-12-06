@@ -149,6 +149,72 @@
         .toast-content strong { display: block; font-size: 0.9rem; color: #1e293b; margin-bottom: 2px;}
         .toast-content span { font-size: 0.85rem; color: #64748b; }
 
+        /* --- Navigation Buttons --- */
+        .nav-links { 
+            display: flex; 
+            align-items: center; 
+            gap: 16px; /* Spacing between buttons */
+        }
+
+        /* 1. Dashboard (Standard Link) */
+        .nav-item {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .nav-item:hover {
+            color: var(--primary);
+            background: #eff6ff; /* Light Blue Background on Hover */
+        }
+
+        /* 2. New Sale (Primary CTA Button) */
+        .nav-btn-primary {
+            background-color: var(--primary);
+            color: white !important; /* Force white text */
+            padding: 8px 16px;
+            border-radius: 50px; /* Pill shape */
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .nav-btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3);
+        }
+
+        /* 3. Logout (Subtle/Warning) */
+        .btn-logout {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .btn-logout:hover {
+            color: #ef4444; /* Red on hover */
+            background: #fef2f2; /* Light Red Background */
+        }
+
     </style>
 </head>
 <body>
