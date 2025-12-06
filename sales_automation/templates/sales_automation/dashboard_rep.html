@@ -44,7 +44,7 @@
 
 <!-- Personal Header -->
 <div style="margin-bottom: 24px;">
-    <p style="font-size: 0.9rem; color: #64748b; font-weight: 500;">Hello, {{ request.user.first_name|default:request.user.username }} 👋</p>
+    <p style="font-size: 0.9rem; color: #64748b; font-weight: 500;">Hello, {{ request.user.first_name|default:request.user.username }} </p>
     <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e293b;">Field Dashboard</h2>
 </div>
 
@@ -102,6 +102,17 @@
     </div>
 </div>
 
+<!-- Sales Performance Chart -->
+<div class="rep-card">
+    <div style="margin-bottom: 16px;">
+        <h3 style="font-size: 1rem; font-weight: 700; color: #334155;">Performance Trend</h3>
+        <p style="font-size: 0.8rem; color: #64748b;">Last 30 Days</p>
+    </div>
+    <div style="height: 200px;">
+        <canvas id="repTrendChart"></canvas>
+    </div>
+</div>
+
 <!-- 4. Recent History -->
 <div class="rep-card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -150,3 +161,46 @@
     </div>
 </div>
 {% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('repTrendChart').getContext('2d');
+        
+        // Create a Green Gradient for the Rep
+        const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+        gradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)'); // Emerald Green
+        gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)'); 
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: JSON.parse('{{ trend_labels|default:"[]"|escapejs }}'),
+                datasets: [{
+                    label: 'My Sales',
+                    data: JSON.parse('{{ trend_data|default:"[]"|escapejs }}'),
+                    borderColor: '#10b981', // Green Line
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4, // Smooth curves
+                    pointRadius: 0, // Clean look (no dots)
+                    pointHoverRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { display: false }, // Hide X axis dates for cleaner look
+                    y: { 
+                        display: true,
+                        grid: { color: '#f1f5f9', borderDash: [5, 5] },
+                        ticks: { font: { size: 10 }, color: '#94a3b8', maxTicksLimit: 5 }
+                    }
+                }
+            }
+        });
+    });
+</script>

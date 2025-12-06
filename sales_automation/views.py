@@ -92,6 +92,7 @@ def dashboard(request):
 
     # --- SCENARIO 2: SALES REP (Field) ---
     else:
+        # 1. Basic Stats
         my_sales = SaleRecord.objects.filter(rep=request.user).order_by('-date')
         today = datetime.date.today()
         visit_count = my_sales.count()
@@ -102,6 +103,18 @@ def dashboard(request):
             date__month=today.month
         ).aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
+        # 2. REP CHART DATA (New Logic)
+        last_30_days = datetime.date.today() - datetime.timedelta(days=30)
+        daily_sales = SaleRecord.objects.filter(rep=request.user, date__gte=last_30_days)\
+            .extra(select={'day': 'date(date)'})\
+            .values('day')\
+            .annotate(total=Sum('total_amount'))\
+            .order_by('day')
+        
+        trend_labels = [item['day'] for item in daily_sales]
+        trend_data = [float(item['total']) for item in daily_sales]
+
+        # 3. Targets
         try:
             profile = RepProfile.objects.get(user=request.user)
             target = profile.monthly_target
@@ -116,7 +129,10 @@ def dashboard(request):
             'visit_count': visit_count,
             'monthly_target': target,
             'current_month_sales': current_month_sales,
-            'target_percentage': min(round(percentage), 100)
+            'target_percentage': min(round(percentage), 100),
+            # Send Chart Data
+            'trend_labels': json.dumps(trend_labels, default=str),
+            'trend_data': json.dumps(trend_data),
         }
         return render(request, 'sales_automation/dashboard_rep.html', context)
 
