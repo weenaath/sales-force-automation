@@ -365,15 +365,15 @@
         });
 
         if(!shopId) {
-            alert("⚠️ Please select a shop!");
+            showToast("Missing Info", "Please select a shop!", "error");
             return;
         }
         if (items.length === 0) {
-            alert("⚠️ Please add at least one product.");
+            showToast("Empty Cart", "Please add at least one product.", "error");
             return;
         }
         if (!valid) {
-            alert("⚠️ Please ensure all items have a product and valid quantity.");
+            showToast("Invalid Input", "Please check product selections and quantities.", "error");
             return;
         }
 
@@ -404,18 +404,19 @@
                 // Success Animation or Redirect
                 btn.innerHTML = `<i class="ph-bold ph-check"></i> Done!`;
                 btn.style.backgroundColor = "#10b981";
+                showToast("Success", "Transaction recorded successfully!", "success");
                 setTimeout(() => {
                     window.location.href = "{% url 'dashboard' %}";
                 }, 800);
             } else {
-                alert("Error: " + data.message);
+                showToast("Error", data.message, "error");
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
         })
         .catch(err => {
             console.error(err);
-            alert("Server Error. Please try again.");
+            showToast("System Error", "Could not connect to server.", "error");
             btn.innerHTML = originalText;
             btn.disabled = false;
         });
