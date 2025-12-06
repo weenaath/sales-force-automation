@@ -1,44 +1,176 @@
 {% extends 'sales_automation/base.html' %}
 
 {% block content %}
-<div style="min-height: 80vh; display: flex; align-items: center; justify-content: center;">
-    <div class="card" style="width: 100%; max-width: 400px; padding: 40px; border-top: 4px solid var(--primary);">
+<style>
+    /* Center the login box vertically and horizontally */
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        /* Ensure the nice mesh background covers everything */
+        background: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                    radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                    radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+        background-color: #f8fafc;
+        background-image: linear-gradient(120deg, #f0f4ff 0%, #f5f3ff 100%);
+    }
+
+    /* Remove navbar margin impact if present */
+    .container { 
+        padding: 0; 
+        margin: 0; 
+        max-width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .login-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        width: 100%;
+        max-width: 400px;
+        padding: 48px;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        text-align: center;
+        animation: floatUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes floatUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-icon-box {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+        box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .input-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .input-wrapper i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 1.2rem;
+        transition: color 0.2s;
+    }
+
+    .input-wrapper input {
+        width: 100%;
+        padding: 14px 16px 14px 48px; /* Left padding for icon */
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        color: #1e293b;
+        background: #f8fafc;
+        transition: all 0.2s;
+        outline: none;
+    }
+
+    .input-wrapper input:focus {
+        border-color: #2563eb;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .input-wrapper input:focus + i {
+        color: #2563eb;
+    }
+
+    .btn-login {
+        width: 100%;
+        padding: 14px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-top: 10px;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-login:hover {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+    }
+
+    .footer-text {
+        margin-top: 32px;
+        font-size: 0.85rem;
+        color: #94a3b8;
+    }
+</style>
+
+<div class="login-card">
+    <!-- Animated Logo Icon -->
+    <div class="login-icon-box">
+        <i class="ph-bold ph-trend-up" style="font-size: 32px; color: white;"></i>
+    </div>
+
+    <h1 style="font-size: 1.8rem; color: #1e293b; margin-bottom: 8px; font-weight: 800;">Welcome Back</h1>
+    <p style="color: #64748b; margin-bottom: 32px; font-size: 0.95rem;">Enter your credentials to access the SFA Portal</p>
+
+    <form method="post">
+        {% csrf_token %}
         
-        <div style="text-align: center; margin-bottom: 30px;">
-            <div style="width: 60px; height: 60px; background: #eff6ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-                <i class="ph-bold ph-graph" style="font-size: 32px; color: var(--primary);"></i>
+        <div class="input-group">
+            <label>Employee ID</label>
+            <div class="input-wrapper">
+                <input type="text" name="username" required placeholder="Ex: rep01" autocomplete="off">
+                <i class="ph-bold ph-user"></i>
             </div>
-            <h2 style="font-size: 1.5rem; color: var(--text-main);">Welcome Back</h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Sales Force Automation Portal</p>
         </div>
-
-        <form method="post">
-            {% csrf_token %}
-            
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Username</label>
-                <div style="position: relative;">
-                    <i class="ph ph-user" style="position: absolute; left: 12px; top: 12px; color: var(--text-muted);"></i>
-                    <input type="text" name="username" required placeholder="Enter ID" style="padding-left: 36px;">
-                </div>
+        
+        <div class="input-group">
+            <label>Password</label>
+            <div class="input-wrapper">
+                <input type="password" name="password" required placeholder="••••••••">
+                <i class="ph-bold ph-lock-key"></i>
             </div>
-            
-            <div style="margin-bottom: 24px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Password</label>
-                <div style="position: relative;">
-                    <i class="ph ph-lock-key" style="position: absolute; left: 12px; top: 12px; color: var(--text-muted);"></i>
-                    <input type="password" name="password" required placeholder="••••••••" style="padding-left: 36px;">
-                </div>
-            </div>
-            
-            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">
-                Sign In
-            </button>
-        </form>
-
-        <div style="text-align: center; margin-top: 24px; font-size: 0.8rem; color: var(--text-muted);">
-            &copy; {% now "Y" %} Sales System. Secure Access Only.
         </div>
+        
+        <button type="submit" class="btn-login">
+            Sign In to Dashboard
+        </button>
+    </form>
+
+    <div class="footer-text">
+        &copy; {% now "Y" %} Sales Force Automation.<br>Secure Access Only.
     </div>
 </div>
 {% endblock %}
