@@ -1,14 +1,14 @@
 # 🚀 Sales Force Automation (SFA) System
 
-A comprehensive, mobile-first Field Sales Management System designed to bridge the gap between field representatives and headquarters. Built with Django and modern Vanilla JS.
+A production-grade, full-stack Field Sales Management platform designed to bridge the gap between headquarters and field representatives. Features real-time GPS tracking, Digital Invoicing, and Interactive Analytics. Built with Django and modern Vanilla JS.
 
 ## 📖 Overview
 
 The Sales Force Automation System is a full-stack web application tailored for distribution companies. It solves the challenge of real-time field data collection by providing:
 
-1. For Sales Reps: A streamlined, mobile-optimized interface to record shop visits, sales, and inventory updates in seconds. 
+1. For Management (HQ): A "Mission Control" dashboard with live revenue tracking, route performance heatmaps, and staff target monitoring. 
 
-2. For Management: A powerful analytics dashboard featuring real-time revenue tracking, route performance maps, and product trend analysis. 
+2. For Field Reps: A streamlined mobile interface to record sales, track inventory, and generate PDF invoices on the spot. 
 
 This project focuses on User Experience (UX) and Data Visualization, moving away from clunky enterprise software to a clean, "SaaS-style" aesthetic.
 
@@ -18,11 +18,11 @@ This project focuses on User Experience (UX) and Data Visualization, moving away
 
 - Visual Analytics: Interactive charts powered by Chart.js.
 
-- Sales Dynamics: Area chart showing revenue trends over the last 30 days.
+- GPS Location Stamping: Automatically captures Latitude/Longitude upon sale submission to verify rep location.
 
-- Product Mix: Doughnut chart identifying top 5 performing SKUs.
+- Digital Invoicing: Generates professional PDF receipts instantly for customers using xhtml2pdf.
 
-- Team Leaderboard: Vertical bar chart comparing sales rep performance.
+- Personal Performance: Real-time "Target vs. Actual" progress bars and 30-day performance trend charts.
 
 - KPI Tiles: Real-time calculation of Total Revenue, Active Transactions, and Growth metrics.
 
