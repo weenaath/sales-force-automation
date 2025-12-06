@@ -2,53 +2,33 @@
 
 {% block content %}
 <style>
-    /* Mobile-First Theme */
     body {
         background-color: #f8fafc;
         background-image: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
     }
-
     .rep-card {
-        background: white;
-        border-radius: 16px;
-        padding: 20px;
+        background: white; border-radius: 16px; padding: 20px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        border: 1px solid #e2e8f0;
-        margin-bottom: 16px;
+        border: 1px solid #e2e8f0; margin-bottom: 16px;
     }
-
     .action-button-large {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        color: white;
-        border-radius: 16px;
-        padding: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        text-decoration: none;
-        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
-        transition: transform 0.2s;
-        margin-bottom: 24px;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white;
+        border-radius: 16px; padding: 24px; display: flex; align-items: center;
+        justify-content: space-between; text-decoration: none;
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); transition: transform 0.2s; margin-bottom: 24px;
     }
     .action-button-large:active { transform: scale(0.98); }
-
-    .stat-pill {
-        background: #f1f5f9;
-        padding: 16px;
-        border-radius: 12px;
-        text-align: center;
-    }
+    .stat-pill { background: #f1f5f9; padding: 16px; border-radius: 12px; text-align: center; }
     .stat-label { font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
     .stat-number { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 4px; }
 </style>
 
-<!-- Personal Header -->
 <div style="margin-bottom: 24px;">
-    <p style="font-size: 0.9rem; color: #64748b; font-weight: 500;">Hello, {{ request.user.first_name|default:request.user.username }} </p>
+    <p style="font-size: 0.9rem; color: #64748b; font-weight: 500;">Hello, {{ request.user.first_name|default:request.user.username }} 👋</p>
     <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e293b;">Field Dashboard</h2>
 </div>
 
-<!-- 1. Primary Action (Record New Visit) -->
+<!-- 1. Primary Action -->
 <a href="{% url 'add_sale' %}" class="action-button-large">
     <div style="display: flex; align-items: center; gap: 16px;">
         <div style="background: rgba(255,255,255,0.2); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
@@ -62,7 +42,7 @@
     <i class="ph-bold ph-caret-right" style="font-size: 24px;"></i>
 </a>
 
-<!-- 2. Target Progress Card -->
+<!-- 2. Target Progress -->
 <div class="rep-card" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border: none;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <div style="display: flex; align-items: center; gap: 8px;">
@@ -71,16 +51,11 @@
             </div>
             <h3 style="font-size: 1rem; font-weight: 600;">Monthly Goal</h3>
         </div>
-        <span style="font-size: 0.8rem; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; font-weight: 600;">
-            {{ target_percentage }}%
-        </span>
+        <span style="font-size: 0.8rem; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; font-weight: 600;">{{ target_percentage }}%</span>
     </div>
-
-    <!-- Progress Bar -->
     <div style="background: rgba(255,255,255,0.1); height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 12px;">
         <div style="width: {{ target_percentage }}%; background: linear-gradient(90deg, #10b981 0%, #34d399 100%); height: 100%; border-radius: 6px; transition: width 1s ease-in-out;"></div>
     </div>
-
     <div style="display: flex; justify-content: space-between; font-size: 0.85rem; opacity: 0.8;">
         <span>Done: <strong>{{ current_month_sales|floatformat:0 }}</strong></span>
         <span>Goal: {{ monthly_target|floatformat:0 }}</span>
@@ -102,24 +77,23 @@
     </div>
 </div>
 
-<!-- Sales Performance Chart -->
+<!-- 4. Sales Performance Chart (THE NEW CHART) -->
 <div class="rep-card">
     <div style="margin-bottom: 16px;">
         <h3 style="font-size: 1rem; font-weight: 700; color: #334155;">Performance Trend</h3>
-        <p style="font-size: 0.8rem; color: #64748b;">Last 30 Days</p>
+        <p style="font-size: 0.8rem; color: #64748b;">My Sales (Last 30 Days)</p>
     </div>
     <div style="height: 200px;">
         <canvas id="repTrendChart"></canvas>
     </div>
 </div>
 
-<!-- 4. Recent History -->
+<!-- 5. Recent History -->
 <div class="rep-card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <h3 style="font-size: 1rem; font-weight: 700; color: #334155;">Recent Log</h3>
         <span style="font-size: 0.8rem; color: #64748b;">Last 10</span>
     </div>
-    
     <div style="display: flex; flex-direction: column; gap: 12px;">
         {% for sale in recent_sales %}
         <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
@@ -129,12 +103,9 @@
                 </div>
                 <div>
                     <div style="font-weight: 600; color: #1e293b; font-size: 0.95rem;">{{ sale.shop.name }}</div>
-                    <div style="font-size: 0.8rem; color: #94a3b8; display: flex; align-items: center; gap: 8px;">
-                        <span>{{ sale.date|date:"M d, h:i A" }}</span>
-                        <!-- New Invoice Link -->
-                        <a href="{% url 'download_invoice' sale.id %}" style="text-decoration: none; color: #2563eb; font-weight: 500; font-size: 0.75rem; background: #eef2ff; padding: 2px 8px; border-radius: 4px;">
-                            Receipt
-                        </a>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">
+                        {{ sale.date|date:"M d, h:i A" }} • 
+                        <a href="{% url 'download_invoice' sale.id %}" style="color: #2563eb;">Receipt</a>
                     </div>
                 </div>
             </div>
@@ -143,49 +114,44 @@
             </div>
         </div>
         {% empty %}
-        <tr>
-            <td colspan="3" style="text-align: center; padding: 60px 20px;">
-                <div style="opacity: 0.5; margin-bottom: 16px;">
-                    <!-- Simple SVG Illustration of an Empty Box -->
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                    </svg>
-                </div>
-                <h4 style="color: #1e293b; font-size: 1rem; margin-bottom: 4px;">No Transactions Yet</h4>
-                <p style="color: #94a3b8; font-size: 0.9rem;">Record your first sale to see data here.</p>
-            </td>
-        </tr>
+        <div style="text-align: center; padding: 20px; color: #94a3b8;">No sales recorded today.</div>
         {% endfor %}
     </div>
 </div>
-{% endblock %}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('repTrendChart').getContext('2d');
+        const labelsRaw = '{{ trend_labels|default:"[]"|escapejs }}';
+        const dataRaw = '{{ trend_data|default:"[]"|escapejs }}';
         
-        // Create a Green Gradient for the Rep
+        let labels = [];
+        let data = [];
+
+        try {
+            labels = JSON.parse(labelsRaw);
+            data = JSON.parse(dataRaw);
+        } catch(e) { console.error("Chart Data Error", e); }
+
         const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-        gradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)'); // Emerald Green
+        gradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)'); 
         gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)'); 
 
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: JSON.parse('{{ trend_labels|default:"[]"|escapejs }}'),
+                labels: labels,
                 datasets: [{
                     label: 'My Sales',
-                    data: JSON.parse('{{ trend_data|default:"[]"|escapejs }}'),
-                    borderColor: '#10b981', // Green Line
+                    data: data,
+                    borderColor: '#10b981',
                     backgroundColor: gradient,
                     borderWidth: 2,
                     fill: true,
-                    tension: 0.4, // Smooth curves
-                    pointRadius: 0, // Clean look (no dots)
-                    pointHoverRadius: 4
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
                 }]
             },
             options: {
@@ -193,14 +159,16 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { display: false }, // Hide X axis dates for cleaner look
+                    x: { display: false },
                     y: { 
                         display: true,
                         grid: { color: '#f1f5f9', borderDash: [5, 5] },
-                        ticks: { font: { size: 10 }, color: '#94a3b8', maxTicksLimit: 5 }
+                        ticks: { font: { size: 10 }, color: '#94a3b8', maxTicksLimit: 5 },
+                        beginAtZero: true
                     }
                 }
             }
         });
     });
 </script>
+{% endblock %}
