@@ -208,8 +208,17 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
-                        No transactions recorded yet.
+                    <td colspan="5" style="text-align: center; padding: 60px 20px;">
+                        <div style="opacity: 0.5; margin-bottom: 16px;">
+                            <!-- Simple SVG Illustration of an Empty Box -->
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                        </div>
+                        <h4 style="color: #1e293b; font-size: 1rem; margin-bottom: 4px;">No Transactions Yet</h4>
+                        <p style="color: #94a3b8; font-size: 0.9rem;">Record your first sale to see data here.</p>
                     </td>
                 </tr>
                 {% endfor %}
